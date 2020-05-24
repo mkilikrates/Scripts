@@ -10,26 +10,10 @@ Resources:
       CodeUri: .
       Description: ''
       MemorySize: 128
-      Timeout: 3
+      Timeout: 10
       Role: 'arn:aws:iam::778501541840:role/UpdateDNSVPC'
       Events:
         CloudWatchEvent1:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              detail-type:
-                - AWS API Call via CloudTrail
-              source:
-                - aws.cloudtrail
-              detail:
-                eventSource:
-                  - cloudtrail.amazonaws.com
-                eventName:
-                  - RunInstances
-                  - DeleteVpc
-                  - CreateVpc
-                  - TerminateInstances
-        CloudWatchEvent2:
           Type: CloudWatchEvent
           Properties:
             Pattern:
@@ -41,9 +25,9 @@ Resources:
                 eventSource:
                   - ec2.amazonaws.com
                 eventName:
-                  - CreateVpc
                   - DeleteVpc
-        CloudWatchEvent3:
+                  - CreateTags
+        CloudWatchEvent2:
           Type: CloudWatchEvent
           Properties:
             Pattern:
@@ -54,4 +38,5 @@ Resources:
               detail:
                 state:
                   - running
-                  - terminated
+                  - shutting-down
+                  - stopping

@@ -342,7 +342,7 @@ def main(argv):
                     response["statusCode"] = "500"
                     response["body"] = str(e)
                     return response
-            if state == 'terminated' or 'stopped': # if notification is terminated to remove DNS
+            if state == 'terminated' or state == 'stopped': # if notification is terminated to remove DNS
                 try:
                     client_ec2 = boto3.client('ec2',region_name=region) #describe instance to get all atributes
                     descinst = client_ec2.describe_instances(
@@ -659,6 +659,7 @@ def main(argv):
                     response["statusCode"] = "500"
                     response["body"] = str(e)
                     return response
+        if detailtype == 'AWS API Call via CloudTrail': # if is state change notification from EC2
         response = {}
         response["statusCode"] = "200"
         response["body"] = json.dumps('DNS Update Success!')
