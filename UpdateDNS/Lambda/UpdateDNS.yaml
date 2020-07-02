@@ -1,42 +1,129 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Description: An AWS Serverless Specification template describing your function.
+Description: AWS Serverless function to update dns based on tags.
 Resources:
+  Ec2StateEventRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "EventRule for EC2 state change"
+      EventPattern: 
+        source: 
+          - "aws.ec2"
+        detail-type: 
+          - "EC2 Instance State-change Notification"
+        detail: 
+          state: 
+            - running
+            - shutting-down
+            - stopping
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "UpdateDNS"
+              - "Arn"
+          Id: "TargetFunctionV1"
+  PermissionForEc2StateEventRuleToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: UpdateDNS
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "Ec2StateEventRule"
+          - "Arn"
+  VPCStateEventRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "EventRule for VPC state change"
+      EventPattern: 
+        source: 
+          - "aws.ec2"
+        detail-type: 
+          - "AWS API Call via CloudTrail"
+        detail: 
+          eventSource:
+          - "ec2.amazonaws.com"
+          eventName: 
+            - DeleteVpc
+            - CreateTags
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "UpdateDNS"
+              - "Arn"
+          Id: "TargetFunctionV1"
+  PermissionForVPCStateEventRuleToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: UpdateDNS
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "VPCStateEventRule"
+          - "Arn"
+  UpdateDNSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: LambdaUpdateHostedZonePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'route53:GetHostedZone'
+                  - 'route53:ChangeResourceRecordSets'
+                  - 'route53:ListHostedZones'
+                  - 'route53:AssociateVPCWithHostedZone'
+                  - 'route53:DisassociateVPCFromHostedZone'
+                Resource: '*'
+        - PolicyName: LambdaLogger
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'logs:CreateLogStream'
+                  - 'logs:CreateLogGroup'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+        - PolicyName: LambdaDescribe
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'ec2:DescribeVpcs'
+                  - 'ec2:DescribeVpcAttribute'
+                  - 'ec2:DescribeInstances'
+                Resource: '*'
   UpdateDNS:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: lambda_function.lambda_handler
       Runtime: python3.8
-      CodeUri: .
-      Description: ''
+      Code:
+        S3Bucket: mauranjo
+        S3Key: lambda/UpdateDNS/UpdateDNS.zip
+      Description: 'Lambda to update DNS using Tags'
       MemorySize: 128
       Timeout: 10
-      Role: 'arn:aws:iam::778501541840:role/UpdateDNSVPC'
-      Events:
-        CloudWatchEvent1:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              detail-type:
-                - AWS API Call via CloudTrail
-              source:
-                - aws.ec2
-              detail:
-                eventSource:
-                  - ec2.amazonaws.com
-                eventName:
-                  - DeleteVpc
-                  - CreateTags
-        CloudWatchEvent2:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              detail-type:
-                - EC2 Instance State-change Notification
-              source:
-                - aws.ec2
-              detail:
-                state:
-                  - running
-                  - shutting-down
-                  - stopping
+      Role: !GetAtt UpdateDNSRole.Arn
+
