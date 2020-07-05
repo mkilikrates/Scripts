@@ -120,8 +120,8 @@ Resources:
       Handler: lambda_function.lambda_handler
       Runtime: python3.8
       Code:
-        S3Bucket: mauranjo
-        S3Key: lambda/UpdateDNS/UpdateDNS.zip
+        S3Bucket: . # put here your bucket name
+        S3Key: lambda/UpdateDNS/UpdateDNS.zip # change here the right path to find your file
       Description: 'Lambda to update DNS using Tags'
       MemorySize: 128
       Timeout: 10
