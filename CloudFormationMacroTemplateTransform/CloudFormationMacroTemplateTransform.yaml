@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Serverless function to transform CloudFormation Templates based on Description Version.
+Resources:
+    CFTemplateTransformRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                        Service: [lambda.amazonaws.com]
+                      Action: ['sts:AssumeRole']
+            Path: /
+            Policies:
+                - PolicyName: root
+                  PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                        - Effect: Allow
+                          Action: ['logs:*']
+                          Resource: 'arn:aws:logs:*:*:*'
+                        - Effect: Allow
+                          Action: ['ec2:*']
+                          Resource: '*'
+                        - Effect: Allow
+                          Action: 
+                              - 'route53:GetHostedZone'
+                          Resource: '*'
+    TransformFunctionPermissions:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: 'lambda:InvokeFunction'
+            FunctionName: !GetAtt CFTemplateTransformFunction.Arn
+            Principal: 'cloudformation.amazonaws.com'
+    CFTemplateTransformFunction:
+        Type: 'AWS::Lambda::Function'
+        Properties:
+            Handler: index.handler
+            Runtime: python3.8
+            Code:
+                S3Bucket: mauranjo
+                S3Key: lambda/CloudFormationTemplateTransform/CloudFormationMacroTemplateTransform.zip
+            Description: Lambda to transform CloudFormation Templates based on Description Version
+            Timeout: 60
+            Role: !GetAtt CFTemplateTransformRole.Arn
+    Transform:
+        Type: 'AWS::CloudFormation::Macro'
+        Properties:
+            Name: CloudFormationTemplateTransform
+            Description: Macro to transform CloudFormation Templates based on Description Version
+            FunctionName: !GetAtt CFTemplateTransformFunction.Arn
+
+
