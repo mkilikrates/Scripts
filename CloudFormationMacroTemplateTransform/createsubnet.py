@@ -72,4 +72,3 @@ def main(vpcname,name,SubCidr,AZ,DualStack,PUbORV6,IPV6id,RT):
         response["body"] = str(e)
     return response
 
-

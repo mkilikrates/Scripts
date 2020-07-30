@@ -31,4 +31,3 @@ def main(name,rol,stack):
         response["body"] = str(e)
     return response
 
-

@@ -38,4 +38,3 @@ def main(name,PrivHZ):
         response["body"] = str(e)
     return response
 
-

@@ -32,4 +32,3 @@ def main():
         action["body"] = str(e)
         config.logger.info('Response: {}'.format(action))
     return action
-

@@ -58,7 +58,7 @@ def main():
         NatGW = config.templateParameterValues['NatGW3']
         action = stack.vpc(UpdateDNS,PrivHZ,vpcname,DualStack,VpcCidr,PubSub,PubSize,PubSubAZs,PrivSub,PrivSize,PrivSubAZs,NatGW)
         config.logger.info('Response: {}'.format(action))
-
+        del config.fragment['Outputs']
         action = {}
         action["statusCode"] = "200"
         action["body"] = config.json.dumps('Template Update Success!')
@@ -71,4 +71,3 @@ def main():
         action["body"] = str(e)
         config.logger.info('Response: {}'.format(action))
     return action
-

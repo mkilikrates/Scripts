@@ -86,4 +86,3 @@ def main():
         config.logger.info('Response: {}'.format(action))
     return action
 
-

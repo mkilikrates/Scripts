@@ -24,4 +24,3 @@ def main(name):
         response["body"] = str(e)
     return response
 
-

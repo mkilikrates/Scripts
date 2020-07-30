@@ -37,4 +37,3 @@ def addingress(sgname,src,srctype,proto,fromport,toport,desc):
         response["body"] = str(e)
     return response
 
-

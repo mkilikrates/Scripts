@@ -44,4 +44,3 @@ def main(vpcname,name,AZ):
         response["body"] = str(e)
     return response
 
-

@@ -118,4 +118,3 @@ def vpc(UpdateDNS,PrivHZ,vpcname,DualStack,VpcCidr,PubSub,PubSize,PubSubAZs,Priv
         config.logger.info('Response: {}'.format(action))
     return action
 
-

@@ -17,7 +17,10 @@ def addv4(name,dst,RTname,gwtype,gw):
         config.fragment['Resources'][name + gw]['Properties'][gwtype] = {}
         config.fragment['Resources'][name + gw]['Properties'][gwtype]['Ref'] = gw
         config.fragment['Resources'][name + gw]['DependsOn'] = []
-        config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw + 'Attach' ]
+        if gwtype == 'GatewayId':
+            config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw + 'Attach' ]
+        else:
+            config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw ]
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('Route ' + name + gw + ' Add Success!')
@@ -42,7 +45,10 @@ def addv6(name,dst,RTname,gwtype,gw):
         config.fragment['Resources'][name + gw]['Properties'][gwtype] = {}
         config.fragment['Resources'][name + gw]['Properties'][gwtype]['Ref'] = gw
         config.fragment['Resources'][name + gw]['DependsOn'] = []
-        config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw + 'Attach' ]
+        if gwtype == 'GatewayId':
+            config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw + 'Attach' ]
+        else:
+            config.fragment['Resources'][name + gw]['DependsOn'] = [ RTname, gw ]
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('Route Add Success!')
@@ -54,5 +60,4 @@ def addv6(name,dst,RTname,gwtype,gw):
         response["statusCode"] = "500"
         response["body"] = str(e)
     return response
-
 

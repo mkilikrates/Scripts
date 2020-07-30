@@ -30,4 +30,3 @@ def main(vpcname,name,DualStack):
     return response
 
 
-

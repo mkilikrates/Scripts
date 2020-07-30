@@ -44,4 +44,3 @@ def main(Name,InstType,AmiId,SecurityGroup,instprof,key):
         response["body"] = str(e)
     return response
 
-

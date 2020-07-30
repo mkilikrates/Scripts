@@ -41,4 +41,3 @@ def manag(name,srv,act,pol):
         response["body"] = str(e)
     return response
 
-
