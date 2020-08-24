@@ -1,9 +1,8 @@
 import config
-def manag(name,srv,act,pol):
+def manag(name,srv,pol):
     # Where:
     # name = Name to be used on resource name (Name + 'Role')
     # srv = AWS Service name to use this role (eg: ec2.amazonaws.com)
-    # stack = If needs to take care of dependency stack (Yes / No)
     # pol = Managed Policy arn to be attached to this role
     try:
         config.fragment['Resources'][name + 'Role'] = {}
@@ -14,7 +13,7 @@ def manag(name,srv,act,pol):
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument'] = {}
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Version'] = {}
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Version'] = "2012-10-17"
-        config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement'] = []
+        config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement'] = {}
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement']['Effect'] = {}
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement']['Effect'] = "Allow"
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement']['Principal'] = {}
@@ -23,8 +22,8 @@ def manag(name,srv,act,pol):
         config.fragment['Resources'][name + 'Role']['Properties']['AssumeRolePolicyDocument']['Statement']['Action'] = [ "sts:AssumeRole" ]
         config.fragment['Resources'][name + 'Role']['Properties']['Path'] = {}
         config.fragment['Resources'][name + 'Role']['Properties']['Path'] = "/"
-        config.fragment['Resources'][name + 'Role']['Properties']['ManagedPolicyArns'] = {}
-        config.fragment['Resources'][name + 'Role']['Properties']['ManagedPolicyArns'] = pol
+        config.fragment['Resources'][name + 'Role']['Properties']['ManagedPolicyArns'] = []
+        config.fragment['Resources'][name + 'Role']['Properties']['ManagedPolicyArns'] = [ pol ]
         config.fragment['Outputs'][name + 'Role'] = {}
         config.fragment['Outputs'][name + 'Role']['Description'] = 'Iam Role'
         config.fragment['Outputs'][name + 'Role']['Value'] = {'Ref': name + 'Role'}

@@ -9,22 +9,33 @@ def addingress(sgname,src,srctype,proto,fromport,toport,desc):
     # toport = end port number or range for the TCP and UDP protocols, or an ICMP/ICMPv6 type number. -1 for ALL icmp
     # desc = Description
     try:
-        config.fragment['Resources']['SGRule' + sgname + src] = {}
-        config.fragment['Resources']['SGRule' + sgname + src]['Type'] = 'AWS::EC2::SecurityGroupIngress'
-        config.fragment['Resources']['SGRule' + sgname + src]['Properties'] = {}
-        config.fragment['Resources']['SGRule' + sgname + src]['Properties']['IpProtocol'] = {}
-        config.fragment['Resources']['SGRule' + sgname + src]['Properties']['IpProtocol'] = proto
+        srcname = src
+        if ':' in srcname:
+            srcname = srcname.replace(':','')
+        if '-' in srcname:
+            srcname = srcname.replace('-','')
+        if '/' in srcname:
+            srcname = srcname.replace('/','')
+        if '.' in srcname:
+            srcname = srcname.replace('.','')
+        config.fragment['Resources']['SGRule' + sgname + srcname] = {}
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Type'] = 'AWS::EC2::SecurityGroupIngress'
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties'] = {}
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = {}
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = { 'Ref': sgname }
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['IpProtocol'] = {}
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['IpProtocol'] = proto
         if fromport != '':
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['FromPort'] = {}
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['FromPort'] = fromport
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['FromPort'] = {}
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['FromPort'] = fromport
         if toport != '':
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['ToPort'] = {}
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['ToPort'] = fromport
-        config.fragment['Resources']['SGRule' + sgname + src]['Properties'][srctype] = {}
-        config.fragment['Resources']['SGRule' + sgname + src]['Properties'][srctype] = src
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['ToPort'] = {}
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['ToPort'] = fromport
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties'][srctype] = {}
+        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties'][srctype] = src
         if desc != '':
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['Description'] = {}
-            config.fragment['Resources']['SGRule' + sgname + src]['Properties']['Description'] = desc
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['Description'] = {}
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['Description'] = desc
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('Rule Add Success!')
