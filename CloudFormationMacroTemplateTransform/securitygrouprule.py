@@ -1,7 +1,7 @@
 import config
-def addingress(sgname,src,srctype,proto,fromport,toport,desc):
+def addingress(sg,src,srctype,proto,fromport,toport,desc):
     # Where:
-    # sgname = Security Group Name
+    # sg = Security Group ID
     # src = Source (CIDR, PrefixList or SecurityGroupID)
     # srctype = Source type to be used (CidrIp, CidrIpv6, SourcePrefixListId, SourceSecurityGroupId:<SourceSecurityGroupOwnerId>)
     # proto = Protocol number or -1 for ALL
@@ -18,11 +18,18 @@ def addingress(sgname,src,srctype,proto,fromport,toport,desc):
             srcname = srcname.replace('/','')
         if '.' in srcname:
             srcname = srcname.replace('.','')
+        if sg.startswith('sg-'):
+            sgname = sg.replace('-','')
+        else:
+            sgname = sg
         config.fragment['Resources']['SGRule' + sgname + srcname] = {}
         config.fragment['Resources']['SGRule' + sgname + srcname]['Type'] = 'AWS::EC2::SecurityGroupIngress'
         config.fragment['Resources']['SGRule' + sgname + srcname]['Properties'] = {}
         config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = {}
-        config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = { 'Ref': sgname }
+        if sg.startswith('sg-'):
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = sg
+        else:
+            config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['GroupId'] = { "Ref": sg }
         config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['IpProtocol'] = {}
         config.fragment['Resources']['SGRule' + sgname + srcname]['Properties']['IpProtocol'] = proto
         if fromport != '':

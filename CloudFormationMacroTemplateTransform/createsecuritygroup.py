@@ -1,19 +1,19 @@
 import config
 def main(VPC,name):
     try:
-        config.fragment['Resources']['SG' + name] = {}
-        config.fragment['Resources']['SG' + name]['Type'] = 'AWS::EC2::SecurityGroup'
-        config.fragment['Resources']['SG' + name]['Properties'] = {}
-        config.fragment['Resources']['SG' + name]['Properties']['GroupName'] = {}
-        config.fragment['Resources']['SG' + name]['Properties']['GroupName'] = 'SG' + name
-        config.fragment['Resources']['SG' + name]['Properties']['GroupDescription'] = {}
-        config.fragment['Resources']['SG' + name]['Properties']['GroupDescription'] = 'SG' + name + '-' + VPC
-        config.fragment['Resources']['SG' + name]['Properties']['VpcId'] = {}
-        config.fragment['Resources']['SG' + name]['Properties']['VpcId'] = VPC
-        config.fragment['Outputs']['SG' + name] = {}
-        config.fragment['Outputs']['SG' + name]['Description'] = 'Security Group ID' + name + '-' + VPC
-        config.fragment['Outputs']['SG' + name]['Value'] = {'Ref': 'SG' + name}
-        config.fragment['Outputs']['SG' + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'SG' + name ] ] } }
+        config.fragment['Resources']['SecG' + name] = {}
+        config.fragment['Resources']['SecG' + name]['Type'] = 'AWS::EC2::SecurityGroup'
+        config.fragment['Resources']['SecG' + name]['Properties'] = {}
+        config.fragment['Resources']['SecG' + name]['Properties']['GroupName'] = {}
+        config.fragment['Resources']['SecG' + name]['Properties']['GroupName'] = 'SecG' + name
+        config.fragment['Resources']['SecG' + name]['Properties']['GroupDescription'] = {}
+        config.fragment['Resources']['SecG' + name]['Properties']['GroupDescription'] = 'SecG' + name + '-' + VPC
+        config.fragment['Resources']['SecG' + name]['Properties']['VpcId'] = {}
+        config.fragment['Resources']['SecG' + name]['Properties']['VpcId'] = VPC
+        config.fragment['Outputs']['SecG' + name] = {}
+        config.fragment['Outputs']['SecG' + name]['Description'] = 'Security Group ID' + name + '-' + VPC
+        config.fragment['Outputs']['SecG' + name]['Value'] = {'Ref': 'SecG' + name}
+        config.fragment['Outputs']['SecG' + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'SecG' + name ] ] } }
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('Security Group ID SG' + name + ' Creation Success!')

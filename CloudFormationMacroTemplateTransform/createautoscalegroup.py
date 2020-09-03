@@ -10,6 +10,7 @@ def main(Name,Cool,Capac,HCGP,Ltemp,LB,MinS,MaxS,Subnet):
     # LB = LoadBalancerNames
     # MinS = minimum size of the Auto Scaling group
     # MaxS = maximum size of the Auto Scaling group
+    # Subnet = subnet list to deploy Auto Scaling group
     try:
         config.fragment['Resources']['ASG' + Name] = {}
         config.fragment['Resources']['ASG' + Name]['Type'] = 'AWS::AutoScaling::AutoScalingGroup'

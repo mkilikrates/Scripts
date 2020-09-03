@@ -36,79 +36,79 @@ def main():
             config.logger.info('Response: {}'.format(action))
             for src in netsrc:
                 if src.startswith('pl-'):
-                    action = securitygrouprule.addingress('SG' + Hostname,src,'SourcePrefixListId','-1','','','')
+                    action = securitygrouprule.addingress('SecG' + Hostname,src,'SourcePrefixListId','-1','','','')
                     config.logger.info('Response: {}'.format(action))
                 elif src == 'zoneprefix':
                     with open('zonemap.cfg') as zonefile:
                         zonemap = config.json.load(zonefile)
                         srcprefix = zonemap['Mappings']['RegionMap'][config.region]['PREFIXLIST']
-                        action = securitygrouprule.addingress('SG' + Hostname,srcprefix,'SourcePrefixListId','-1','','','')
+                        action = securitygrouprule.addingress('SecG' + Hostname,srcprefix,'SourcePrefixListId','-1','','','')
                         config.logger.info('Response: {}'.format(action))
                 else:
                     ip = config.IPNetwork(src)
                     if ip.version == 4:
-                        action = securitygrouprule.addingress('SG' + Hostname,str(ip),'CidrIp','-1','','','')
+                        action = securitygrouprule.addingress('SecG' + Hostname,str(ip),'CidrIp','-1','','','')
                         config.logger.info('Response: {}'.format(action))
                     if ip.version == 6:
-                        action = securitygrouprule.addingress('SG' + Hostname,str(ip),'CidrIpv6','-1','','','')
+                        action = securitygrouprule.addingress('SecG' + Hostname,str(ip),'CidrIpv6','-1','','','')
             if InstProfAct == 'Create New Role':
-                action = createiamrole.manag(InstProfName,'ec2.amazonaws.com',MgtPol)
+                action = createiamrole.manag('IAMRole' + Hostname,'ec2.amazonaws.com',MgtPol)
                 config.logger.info('Response: {}'.format(action))
-                action = createinstprof.main(InstProfName,InstProfName + 'Role','yes')
+                action = createinstprof.main('InstProf' + Hostname,'IAMRole' + Hostname,'yes')
                 config.logger.info('Response: {}'.format(action))
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SecG' + Hostname,'InstProf' + Hostname,Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             elif InstProfAct == 'Use Existent Role':
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SecG' + Hostname,'InstProfName',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             else:
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,'',Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SecG' + Hostname,'',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
         elif SGAction == 'Update SG':
             for src in netsrc:
                 if src.startswith('pl-'):
-                    action = securitygrouprule.addingress(SecurityGroup,src,'SourcePrefixListId','-1','','','')
+                    action = securitygrouprule.addingress(SecurityGroup[0],src,'SourcePrefixListId','-1','','','')
                     config.logger.info('Response: {}'.format(action))
                 elif src == 'zoneprefix':
                     with open('zonemap.cfg') as zonefile:
                         zonemap = config.json.load(zonefile)
                         srcprefix = zonemap['Mappings']['RegionMap'][config.region]['PREFIXLIST']
-                        action = securitygrouprule.addingress('SG' + Hostname,srcprefix,'SourcePrefixListId','-1','','','')
+                        action = securitygrouprule.addingress(SecurityGroup[0],srcprefix,'SourcePrefixListId','-1','','','')
                         config.logger.info('Response: {}'.format(action))
                 else:
                     ip = config.IPNetwork(src)
                     if ip.version == 4:
-                        action = securitygrouprule.addingress(SecurityGroup,ip,'CidrIp','-1','','','')
+                        action = securitygrouprule.addingress(SecurityGroup[0],ip,'CidrIp','-1','','','')
                         config.logger.info('Response: {}'.format(action))
                     if ip.version == 6:
-                        action = securitygrouprule.addingress(SecurityGroup,ip,'CidrIpv6','-1','','','')
+                        action = securitygrouprule.addingress(SecurityGroup[0],ip,'CidrIpv6','-1','','','')
                         config.logger.info('Response: {}'.format(action))
             if InstProfAct == 'Create New Role':
-                action = createiamrole.manag(InstProfName,'ec2.amazonaws.com',MgtPol)
+                action = createiamrole.manag('IAMRole' + Hostname,'ec2.amazonaws.com',MgtPol)
                 config.logger.info('Response: {}'.format(action))
-                action = createinstprof.main(InstProfName,InstProfName + 'Role','yes')
+                action = createinstprof.main('InstProf' + Hostname,'IAMRole' + Hostname,'yes')
                 config.logger.info('Response: {}'.format(action))
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'InstProf' + Hostname,Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             elif InstProfAct == 'Use Existent Role':
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'InstProfName',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             else:
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,'',Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
         else:
             if InstProfAct == 'Create New Role':
-                action = createiamrole.manag(InstProfName,'ec2.amazonaws.com',MgtPol)
+                action = createiamrole.manag('IAMRole' + Hostname,'ec2.amazonaws.com',MgtPol)
                 config.logger.info('Response: {}'.format(action))
-                action = createinstprof.main(InstProfName,InstProfName + 'Role','yes')
+                action = createinstprof.main('InstProf' + Hostname,'IAMRole' + Hostname,'yes')
                 config.logger.info('Response: {}'.format(action))
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'InstProf' + Hostname,Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             elif InstProfAct == 'Use Existent Role':
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,InstProfName,Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'InstProfName',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
             else:
-                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,'SG' + Hostname,'',Keyname,usrdata,PublicIP)
+                action = createlaunchtemplate.main(Hostname,InstType,LatestAmiId,SecurityGroup,'',Keyname,usrdata,PublicIP)
                 config.logger.info('Response: {}'.format(action))
         action = createautoscalegroup.main(Hostname,'',InstNumb,'','LT' + Hostname,'',InstNumb,InstNumb,Subnet)
         config.logger.info('Response: {}'.format(action))

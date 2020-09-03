@@ -11,7 +11,7 @@ def main(name,rol,stack):
         config.fragment['Resources'][name]['Properties']['Path'] = {}
         config.fragment['Resources'][name]['Properties']['Path'] = "/"
         config.fragment['Resources'][name]['Properties']['Roles'] = []
-        config.fragment['Resources'][name]['Properties']['Roles'] = [rol]
+        config.fragment['Resources'][name]['Properties']['Roles'] = [ {'Ref': rol } ]
         if stack == 'yes':
             config.fragment['Resources'][name]['DependsOn'] = {}
             config.fragment['Resources'][name]['DependsOn'] = rol
