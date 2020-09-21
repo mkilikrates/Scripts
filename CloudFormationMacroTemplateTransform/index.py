@@ -3,6 +3,7 @@ import action_V001
 import action_V002
 import action_V003
 import action_V004
+import action_V005
 def handler(event, context):
     config.logger.info('event: {}'.format(event))
     response = {
@@ -57,6 +58,17 @@ def handler(event, context):
         if config.templateaction == 'V0.0.4':
             try:
                 action = action_V004.main()
+                config.logger.info('Response: {}'.format(action))
+                response["statusCode"] = action["statusCode"]
+                response["body"] = action["body"]
+            except Exception as e:
+                config.logger.error('ERROR: {}'.format(e))
+                config.traceback.print_exc()
+                response["statusCode"] = "500"
+                response["body"] = str(e)
+        if config.templateaction == 'V0.0.5':
+            try:
+                action = action_V005.main()
                 config.logger.info('Response: {}'.format(action))
                 response["statusCode"] = action["statusCode"]
                 response["body"] = action["body"]
