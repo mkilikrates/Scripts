@@ -6,7 +6,7 @@ def main():
         #locals
         nslist = []
         directId = config.resproper['DirectoryId']
-        action = .ds.desc_ds(directId)
+        action = ds.desc_ds(directId)
         config.logger.info('Response: {}'.format(action))
         for directory in action['DirectoryDescriptions']:
             dns = directory['DnsIpAddrs']
