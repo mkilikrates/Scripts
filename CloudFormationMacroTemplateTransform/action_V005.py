@@ -6,9 +6,10 @@ import customresource
 def main():
     try:
         if len(config.templateParameterValues['SubnetAD']) >2:
-            response["statusCode"] = "400"
-            response["body"] = config.json.dumps('Simple AD Allow only 2 subnets!')
-            return response
+            action = {}
+            action["statusCode"] = "400"
+            action["body"] = config.json.dumps('Simple AD Allow only 2 subnets!')
+            return action
         else:
             name = {'Ref': 'SimpleADName'}
             if config.templateParameterValues['Alias'] != '':
@@ -63,21 +64,21 @@ def main():
             elif sgr53endact == 'Update SG':
                 for src in netsrc:
                     if src.startswith('pl-'):
-                        action = securitygroup.addingress(SecurityGroup[0],src,'SourcePrefixListId','-1','','','')
+                        action = securitygroup.addingress(sgr53end[0],src,'SourcePrefixListId','-1','','','')
                         config.logger.info('Response: {}'.format(action))
                     elif src == 'zoneprefix':
                         with open('zonemap.cfg') as zonefile:
                             zonemap = config.json.load(zonefile)
                             srcprefix = zonemap['Mappings']['RegionMap'][config.region]['PREFIXLIST']
-                            action = securitygroup.addingress(SecurityGroup[0],srcprefix,'SourcePrefixListId','-1','','','')
+                            action = securitygroup.addingress(sgr53end[0],srcprefix,'SourcePrefixListId','-1','','','')
                             config.logger.info('Response: {}'.format(action))
                     else:
                         ip = config.IPNetwork(src)
                         if ip.version == 4:
-                            action = securitygroup.addingress(SecurityGroup[0],ip,'CidrIp','-1','','','')
+                            action = securitygroup.addingress(sgr53end[0],ip,'CidrIp','-1','','','')
                             config.logger.info('Response: {}'.format(action))
                         if ip.version == 6:
-                            action = securitygroup.addingress(SecurityGroup[0],ip,'CidrIpv6','-1','','','')
+                            action = securitygroup.addingress(sgr53end[0],ip,'CidrIpv6','-1','','','')
                             config.logger.info('Response: {}'.format(action))
                 sg = sgr53end
                 action = r53resolver.createendpoint(r53endname,'OUTBOUND',sg,subr53end,'SimpleAD' + recname)
