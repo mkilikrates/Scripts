@@ -104,14 +104,13 @@ def main():
             if ' ' in assname:
                 assname = assname.replace(' ','')
             resruleid = {'Ref' : 'R53ResRule' + r53endname + recname}
-            dep = {'R53ResRule' + r53endname + recname}
+            dep = ['R53ResRule' + r53endname + recname]
             action = r53resolver.assocrule(assname,resruleid,vpc,dep)
             config.logger.info('Response: {}'.format(action))
             action = {}
             action["statusCode"] = "200"
             action["body"] = config.json.dumps('Template Update Success!')
             config.logger.info('Response: {}'.format(action))
-            return action
     except Exception as e:
         action = {}
         config.logger.error('ERROR: {}'.format(e))

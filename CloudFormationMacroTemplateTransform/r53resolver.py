@@ -60,7 +60,7 @@ def createrule(name,domain,res,rulet,ip,dep):
             config.fragment['Resources']['R53ResRule' + name]['DependsOn'] = dep
         config.fragment['Outputs']['R53ResRule' + name] = {}
         config.fragment['Outputs']['R53ResRule' + name]['Description'] = {}
-        config.fragment['Outputs']['R53ResRule' + name]['Description'] = { 'Resolver Endpoint ' + rulet + ' ' + name }
+        config.fragment['Outputs']['R53ResRule' + name]['Description'] = 'Resolver Endpoint ' + rulet + ' ' + name
         config.fragment['Outputs']['R53ResRule' + name]['Value'] = {}
         config.fragment['Outputs']['R53ResRule' + name]['Value'] = {'Ref': 'R53ResRule' + name}
         config.fragment['Outputs']['R53ResRule' + name]['Export'] = {}
@@ -93,14 +93,14 @@ def assocrule(name,ruleid,vpc,dep):
             config.fragment['Resources']['R53RRuleAss' + name]['DependsOn'] = dep
         config.fragment['Outputs']['R53RRuleAss' + name] = {}
         config.fragment['Outputs']['R53RRuleAss' + name]['Description'] = {}
-        config.fragment['Outputs']['R53RRuleAss' + name]['Description'] = { 'Res Endpoint Assoc ' + name }
+        config.fragment['Outputs']['R53RRuleAss' + name]['Description'] = 'Res Endpoint Assoc ' + name
         config.fragment['Outputs']['R53RRuleAss' + name]['Value'] = {}
         config.fragment['Outputs']['R53RRuleAss' + name]['Value'] = {'Ref': 'R53RRuleAss' + name}
         config.fragment['Outputs']['R53RRuleAss' + name]['Export'] = {}
         config.fragment['Outputs']['R53RRuleAss' + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'R53RRuleAss' + name ] ] } }
         response = {}
         response["statusCode"] = "200"
-        response["body"] = config.json.dumps('Route53 Resolver rule Association ' + ruleid + ' Creation Success!')
+        response["body"] = config.json.dumps('Route53 Resolver rule Association ' + name + ' Creation Success!')
         return response
     except Exception as e:
         response = {}
