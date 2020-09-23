@@ -19,8 +19,11 @@ def create(name,srvtk,dep,keylist):
             config.fragment['Resources'][name]['DependsOn'] = {}
             config.fragment['Resources'][name]['DependsOn'] = dep
         config.fragment['Outputs'][name] = {}
+        config.fragment['Outputs'][name]['Description'] = {}
         config.fragment['Outputs'][name]['Description'] = 'Custom Resource' + name
+        config.fragment['Outputs'][name]['Value'] = {}
         config.fragment['Outputs'][name]['Value'] = {'Ref': name}
+        config.fragment['Outputs'][name]['Export'] = {}
         config.fragment['Outputs'][name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , name ] ] } }
         response = {}
         response["statusCode"] = "200"

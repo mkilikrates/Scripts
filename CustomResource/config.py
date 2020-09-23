@@ -1,5 +1,7 @@
+import os
 import sys
 import json
+import requests
 import traceback
 import logging
 import boto3

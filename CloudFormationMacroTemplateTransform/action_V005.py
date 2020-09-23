@@ -91,8 +91,20 @@ def main():
             action = customresource.create('namesrv','arn:aws:lambda:eu-west-1:778501541840:function:CloudFormationCustomResources-CustResFunc-242OKZQ449P0',dep,keylist)
             config.logger.info('Response: {}'.format(action))
             dep = ['SimpleAD' + recname,'R53ResEnd' + r53endname]
-            dns = { "Ref" : "namesrv" }
-            action = r53resolver.createrule(r53endname + recname,name,'R53ResEnd' + r53endname,'FORWARD',dns,dep)
+            dns = { "Fn::GetAtt" : ["namesrv", "DnsIpAddrs" ] }
+            res = {'Ref' : 'R53ResEnd' + r53endname }
+            action = r53resolver.createrule(r53endname + recname,name,res,'FORWARD',dns,dep)
+            config.logger.info('Response: {}'.format(action))
+            assname = recname + 'vpc'
+            if '-' in assname:
+                assname = assname.replace('-','')
+            if '.' in assname:
+                assname = assname.replace('.','')
+            if ' ' in assname:
+                assname = assname.replace(' ','')
+            resruleid = {'Ref' : 'R53ResRule' + r53endname + recname}
+            dep = {'R53ResRule' + r53endname + recname}
+            action = r53resolver.assocrule(assname,resruleid,vpc,dep)
             config.logger.info('Response: {}'.format(action))
             action = {}
             action["statusCode"] = "200"

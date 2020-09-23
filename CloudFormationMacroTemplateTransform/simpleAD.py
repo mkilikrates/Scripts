@@ -36,8 +36,11 @@ def create(recname,name,alias,desc,sso,pwd,netb,size,sub,vpc,dep):
             config.fragment['Resources']['SimpleAD' + recname]['DependsOn'] = {}
             config.fragment['Resources']['SimpleAD' + recname]['DependsOn'] = dep
         config.fragment['Outputs']['SimpleAD' + recname] = {}
-        config.fragment['Outputs']['SimpleAD' + recname]['Description'] = 'Simple AD ID'
+        config.fragment['Outputs']['SimpleAD' + recname]['Description'] = {}
+        config.fragment['Outputs']['SimpleAD' + recname]['Description'] = 'Simple AD ID' + recname
+        config.fragment['Outputs']['SimpleAD' + recname]['Value'] = {}
         config.fragment['Outputs']['SimpleAD' + recname]['Value'] = {'Ref': 'SimpleAD' + recname}
+        config.fragment['Outputs']['SimpleAD' + recname]['Export'] = {}
         config.fragment['Outputs']['SimpleAD' + recname]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'SimpleAD' + recname ] ] } }
         response = {}
         response["statusCode"] = "200"

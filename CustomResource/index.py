@@ -14,8 +14,7 @@ def handler(event, context):
     }
     try:
         # Globals
-        #config.region = event['region']
-        #config.accountId = event['accountId']
+        config.region = config.os.environ['AWS_REGION']
         config.reqtype = event['RequestType']
         config.stacktId = event['StackId']
         config.requestId = event['RequestId']
@@ -28,7 +27,7 @@ def handler(event, context):
                 action = action_V001.main()
                 config.logger.info('Response: {}'.format(action))
                 response["Reason"] = action["Reason"]
-                response["Data"]["DnsIpAddrs"] = {}
+                response["Data"]["DnsIpAddrs"] = []
                 response["Data"]["DnsIpAddrs"] = action["DnsIpAddrs"]
             except Exception as e:
                 config.logger.error('ERROR: {}'.format(e))
@@ -37,13 +36,23 @@ def handler(event, context):
                 response["Status"] = "FAILED"
         if not 'statusCode' in action:
             response["Reason"] = config.json.dumps('Nothing to do with requestId: ' + config.requestId)
-        config.logger.info (response)
-        config.logger.info('event: {}'.format(event))
-        return response
     except Exception as e:
         config.logger.error('ERROR: {}'.format(e))
         config.traceback.print_exc()
         response["Reason"] = str(e)
         response["Status"] = "FAILED"
+    config.logger.info('Sending Response')
+    config.logger.info('response: {}'.format(response))
+    response_data = config.json.dumps(response)
+    headers = {
+        'content-type': '',
+        'content-length': str(len(response_data))
+    }
+    try:
+        action = config.requests.put(config.respurl,data=response_data,headers=headers)
+        config.logger.info('CloudFormation returned status code: {}'.format(response["Reason"]))
+    except Exception as e:
+        config.logger.info('send(..) failed executing requests.put(..): {}'.format(e))
+        raise
     return response
 

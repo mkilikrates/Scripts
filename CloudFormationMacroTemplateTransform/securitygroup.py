@@ -11,8 +11,11 @@ def create(VPC,name):
         config.fragment['Resources']['SecG' + name]['Properties']['VpcId'] = {}
         config.fragment['Resources']['SecG' + name]['Properties']['VpcId'] = VPC
         config.fragment['Outputs']['SecG' + name] = {}
+        config.fragment['Outputs']['SecG' + name]['Description'] = {}
         config.fragment['Outputs']['SecG' + name]['Description'] = 'Security Group ID' + name
+        config.fragment['Outputs']['SecG' + name]['Value'] = {}
         config.fragment['Outputs']['SecG' + name]['Value'] = {'Ref': 'SecG' + name}
+        config.fragment['Outputs']['SecG' + name]['Export'] = {}
         config.fragment['Outputs']['SecG' + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'SecG' + name ] ] } }
         response = {}
         response["statusCode"] = "200"
