@@ -1,0 +1,7 @@
+{
+  "name": "godigital.oupchina.com.hk",
+  "ns": [
+    "8.8.8.8",
+    "4.4.4.4"
+  ]
+}

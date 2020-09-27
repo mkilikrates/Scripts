@@ -1,0 +1,5 @@
+{
+  "name": "account.oupchina.com.hk",
+  "ip": "52.76.66.156",
+  "url": "https://account.oupchina.com.hk/auth/v1/.well-known/jwks.json"
+}
