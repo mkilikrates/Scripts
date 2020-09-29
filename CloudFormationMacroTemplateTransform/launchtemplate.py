@@ -1,6 +1,6 @@
 import config
 import base64
-def main(Name,InstType,AmiId,SecurityGroup,instprof,key,usrdata,PublicIP):
+def create(Name,InstType,AmiId,SecurityGroup,instprof,key,usrdata,PublicIP,dep):
     # Where:
     # Name = Name to be used on resource name (LT + Name)
     # InstType = InstanceType
@@ -23,17 +23,9 @@ def main(Name,InstType,AmiId,SecurityGroup,instprof,key,usrdata,PublicIP):
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['InstanceInitiatedShutdownBehavior'] = 'terminate'
         if PublicIP == 'Yes':
             config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = []
-            if type(SecurityGroup) == list:
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'true', 'DeviceIndex' : 0, 'Groups' : [ ] } ]
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'true', 'DeviceIndex' : 0, 'Groups' : SecurityGroup } ]
-            else:
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'true', 'DeviceIndex' : 0, 'Groups' : [ { 'Fn::GetAtt' : [ SecurityGroup, 'GroupId' ] } ] } ]
+            config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'true', 'DeviceIndex' : 0, 'Groups' : SecurityGroup } ]
         else:
-            if type(SecurityGroup) == list:
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'false', 'DeviceIndex' : 0, 'Groups' : [ ] } ]
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'false', 'DeviceIndex' : 0, 'Groups' : SecurityGroup } ]
-            else:
-                config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'false', 'DeviceIndex' : 0, 'Groups' : [ { 'Fn::GetAtt' : [ SecurityGroup, 'GroupId' ] } ] } ]
+            config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['NetworkInterfaces'] = [ { 'AssociatePublicIpAddress' : 'false', 'DeviceIndex' : 0, 'Groups' : SecurityGroup } ]
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['ImageId'] = {}
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['ImageId'] = AmiId
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['InstanceType'] = {}
@@ -44,7 +36,7 @@ def main(Name,InstType,AmiId,SecurityGroup,instprof,key,usrdata,PublicIP):
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['Monitoring'] = { 'Enabled' : 'false' }
         if instprof !='':
             config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['IamInstanceProfile'] = {}
-            config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['IamInstanceProfile'] = { 'Name' : { 'Ref': instprof } }
+            config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['IamInstanceProfile'] = { 'Name' : instprof }
         if usrdata !='None':
             config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['UserData'] = {}
             data = open(usrdata + ".cfg", "r").read()
@@ -52,6 +44,9 @@ def main(Name,InstType,AmiId,SecurityGroup,instprof,key,usrdata,PublicIP):
             config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['UserData'] = encoded
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['TagSpecifications'] = []
         config.fragment['Resources']['LT' + Name]['Properties']['LaunchTemplateData']['TagSpecifications'] = [ { 'ResourceType' : 'instance', 'Tags' : [ {'Key': 'Name', 'Value': { 'Ref': 'AWS::StackName' } } ] } ]
+        if dep != '':
+            config.fragment['Resources']['LT' + Name]['DependsOn'] = {}
+            config.fragment['Resources']['LT' + Name]['DependsOn'] = dep
         config.fragment['Outputs']['LT' + Name] = {}
         config.fragment['Outputs']['LT' + Name]['Description'] = 'Instance Template' + Name
         config.fragment['Outputs']['LT' + Name]['Value'] = {'Ref': 'LT' + Name}
