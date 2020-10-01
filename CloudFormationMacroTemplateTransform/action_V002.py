@@ -17,6 +17,8 @@ def main():
         HostedZones = config.templateParameterValues['HostedZones']
         InstType = {'Ref': 'InstType'}
         InstNumb = {'Ref': 'InstNumb'}
+        InstMin = {'Ref': 'InstMin'}
+        InstMax = {'Ref': 'InstMax'}
         Hostname = config.templateParameterValues['Hostname']
         LatestAmiId = {'Ref': 'LatestAmiId'}
         InstProfAct = config.templateParameterValues['InstProfAct']
@@ -87,16 +89,18 @@ def main():
         config.logger.info('Response: {}'.format(action))
         ltemp = 'LT' + Hostname
         dep = ['LT' + Hostname]
-        action = autoscalegroup.create(Hostname,'',InstNumb,'',ltemp,'',InstNumb,InstNumb,Subnet,dep)
+        action = autoscalegroup.create(Hostname,'',InstNumb,'',ltemp,'',InstMin,InstMax,Subnet,dep)
         config.logger.info('Response: {}'.format(action))
         if ASGAction == 'Yes':
             asgname = 'ASG' + Hostname
-            capac = 'DesiredCapacity:0'
+            ncapac = config.templateParameterValues['InstNumb']
+            capac = 'DesiredCapacity:' + ncapac
             recr = {'Ref': 'AsgActStartRec'}
             dep = [asgname]
             action = autoscalegroup.schdact('startday',asgname,capac,'','',recr,dep)
             config.logger.info('Response: {}'.format(action))
-            capac = 'DesiredCapacity:1'
+            mincapac = config.templateParameterValues['InstMin']
+            capac = 'DesiredCapacity:' + mincapac
             recr = {'Ref': 'AsgActStopRec'}
             action = autoscalegroup.schdact('stopday',asgname,capac,'','',recr,dep)
             config.logger.info('Response: {}'.format(action))
