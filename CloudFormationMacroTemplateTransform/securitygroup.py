@@ -40,6 +40,8 @@ def addingress(sg,src,srctype,proto,fromport,toport,desc):
     # desc = Description
     try:
         srcname = src
+        if type(srcname) == type(dict()):
+            srcname = srcname['Ref']
         if ':' in srcname:
             srcname = srcname.replace(':','')
         if '-' in srcname:

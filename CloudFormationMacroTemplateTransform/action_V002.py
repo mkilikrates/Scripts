@@ -52,6 +52,8 @@ def main():
                         config.logger.info('Response: {}'.format(action))
                     if ip.version == 6:
                         action = securitygroup.addingress('SecG' + Hostname,str(ip),'CidrIpv6','-1','','','')
+            srcsg = {'Ref': 'SecG' + Hostname}
+            action = securitygroup.addingress('SecG' + Hostname,srcsg,'SourceSecurityGroupId','-1','','','')
             sg = [ { 'Fn::GetAtt' : [ 'SecG' + Hostname, 'GroupId' ] } ]
         elif SGAction == 'Update SG':
             for src in netsrc:
