@@ -86,7 +86,7 @@ def main():
                 mygw = {'Ref' : gwid}
                 dep.append(mygw)
             if vpnopt == 'default':
-                action = gateway.vpn('VPN',cgw,bgp,mygw,vpntype,vpnopt,dep)
+                action = gateway.vpn('VPN',cgw,bgp,mygw,vpntype,dep)
             else:
                 myvpnopts = {}
                 if config.templateParameterValues['tunnel1insidecidrv4'] !='':

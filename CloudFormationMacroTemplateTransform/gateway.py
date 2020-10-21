@@ -165,7 +165,6 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
         response["statusCode"] = "500"
         response["body"] = str(e)
     return response
-
 def vpn(name,cgw,bgp,mygw,vgtype,dep):
     try:
         config.fragment['Resources'][name] = {}
