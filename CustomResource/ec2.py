@@ -82,11 +82,11 @@ def describe_customer_gateways(region,name,asn,cert):
                     'Values': [
                         name
                     ],
+                },
+                {
                     'Name': 'bgp-asn',
                     'Values': [
                         asn
-                    ]
-                        }
                     ]
                 }
             ]
@@ -101,6 +101,21 @@ def describe_customer_gateways(region,name,asn,cert):
     return response
 
 def delete_customer_gateway(region,cgwid):
+    try:
+        client_ec2 = config.boto3.client('ec2', region_name=region)
+        customer_gateway = client_ec2.delete_customer_gateway(
+            CustomerGatewayId=cgwid
+        )
+        return customer_gateway
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["Reason"] = str(e)
+    return response
+
+def create_vpn_connection(region,vpntype,cgwid,):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
         customer_gateway = client_ec2.delete_customer_gateway(
