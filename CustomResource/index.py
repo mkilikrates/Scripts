@@ -1,5 +1,6 @@
 import config
 import action_V001
+import action_V002
 def handler(event, context):
     config.logger.info('event: {}'.format(event))
     config.logger.info('context: {}'.format(context))
@@ -29,6 +30,17 @@ def handler(event, context):
                 response["Reason"] = action["Reason"]
                 response["Data"]["DnsIpAddrs"] = []
                 response["Data"]["DnsIpAddrs"] = action["DnsIpAddrs"]
+            except Exception as e:
+                config.logger.error('ERROR: {}'.format(e))
+                config.traceback.print_exc()
+                response["Reason"] = str(e)
+                response["Status"] = "FAILED"
+        if config.resproper['Version'] == 'V0.0.2':
+            try:
+                action = action_V002.main()
+                config.logger.info('Response: {}'.format(action))
+                response["Reason"] = action["Reason"]
+                response["Data"] = action["Addresses"]
             except Exception as e:
                 config.logger.error('ERROR: {}'.format(e))
                 config.traceback.print_exc()
