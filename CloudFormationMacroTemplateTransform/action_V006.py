@@ -26,6 +26,21 @@ def main():
         dnssup = {'Ref': 'dnssup'}
         multicastsup = {'Ref': 'multicastsup'}
         ecmpsup = {'Ref': 'ecmpsup'}
+        VPC = config.templateParameterValues['VPC']
+        Subnet = config.templateParameterValues['Subnet']
+        SecurityGroup = config.templateParameterValues['SecurityGroup']
+        SGAction = config.templateParameterValues['SGAction']
+        ASGAction = config.templateParameterValues['ASGAction']
+        SGSRC = config.templateParameterValues['SGSRC']
+        InstType = {'Ref': 'InstType'}
+        InstNumb = {'Ref': 'InstNumb'}
+        InstMin = {'Ref': 'InstMin'}
+        InstMax = {'Ref': 'InstMax'}
+        Hostname = config.templateParameterValues['Hostname']
+        LatestAmiId = {'Ref': 'LatestAmiId'}
+        InstProfAct = config.templateParameterValues['InstProfAct']
+        MgtPol = config.templateParameterValues['MgtPol']
+        Keyname = config.templateParameterValues['Keyname']
         usrdata = config.templateParameterValues['usrdata']
         config.fragment['Resources'] = {}
         config.fragment['Outputs'] = {}
@@ -60,11 +75,11 @@ def main():
                 cgw = {'Ref' : 'CGW'}
                 dep = ['CGW']
             if vpntype == 'VGW' and gwid == 'New':
-                action = gateway.vgw('VGW',localasn,tgwdesc,'ipsec.1',bgp)
+                action = gateway.vgw('VGW',localasn,tgwdesc,'ipsec.1',bgp,'')
                 mygw = {'Ref' : 'VGW'}
                 dep.append('VGW')
             if vpntype == 'TGW' and gwid == 'New':
-                action = gateway.tgw('TGW',localasn,tgwdesc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multicastsup,ecmpsup)
+                action = gateway.tgw('TGW',localasn,tgwdesc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multicastsup,ecmpsup,'')
                 mygw = {'Ref' : 'TGW'}
                 dep.append('TGW')
             if gwid.startswith('vgw-') or gwid.startswith('tgw-'):
@@ -73,7 +88,7 @@ def main():
             if vpnopt == 'default':
                 action = gateway.vpn('VPN',cgw,bgp,mygw,vpntype,vpnopt,dep)
             else:
-                myvpnopts = []
+                myvpnopts = {}
                 if config.templateParameterValues['tunnel1insidecidrv4'] !='':
                     myvpnopts['Tunnel1InsideCidr'] = config.templateParameterValues['tunnel1insidecidrv4']
                 if config.templateParameterValues['tunnel1insidecidrv6'] !='':
@@ -118,6 +133,8 @@ def main():
                 if config.templateParameterValues['tunnelikev'] !='':
                     myvpnopts['IKEVersions'] = []
                     myvpnopts['IKEVersions'].append({'Value' : config.templateParameterValues['tunnelikev']})
+                    vpnaccel = config.templateParameterValues['vpnaccel']
+                    vpnipfamily = config.templateParameterValues['vpnipfamily']
                 if bgp == 0:
                     keylist = { 'Version' : 'V0.0.3', 'VPNConn' : { 'Customer-Gateway-Id' : cgw, 'Gateway-Type' : vpntype, 'Gateway-Id' : mygw, 'EnableAcceleration' : vpnaccel, 'StaticRoutesOnly' : 'True', 'TunnelInsideIpVersion' : vpnipfamily, 'VPNOptions' : myvpnopts} }
                 else:
@@ -179,7 +196,7 @@ def main():
                 InstProfName = {'Ref': 'InstProf' + Hostname}
             elif InstProfAct == 'Use Existent Role':
                 InstProfName = {'Ref': 'InstProfName'}
-            action = launchtemplate.create(Hostname,InstType,LatestAmiId,sg,InstProfName,Keyname,usrdata,PublicIP,'')
+            action = launchtemplate.create(Hostname,InstType,LatestAmiId,sg,InstProfName,Keyname,usrdata,'No','')
             config.logger.info('Response: {}'.format(action))
             ltemp = 'LT' + Hostname
             dep = ['LT' + Hostname]

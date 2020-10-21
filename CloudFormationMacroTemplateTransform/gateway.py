@@ -108,7 +108,6 @@ def tgw(name,asn,desc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multi
         response["body"] = str(e)
     return response
 
-import config
 def eggw(name,dep):
     try:
         config.fragment['Resources']['EgressGW' + name] = {}
@@ -167,4 +166,37 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
         response["body"] = str(e)
     return response
 
-
+def vpn(name,cgw,bgp,mygw,vgtype,dep):
+    try:
+        config.fragment['Resources'][name] = {}
+        config.fragment['Resources'][name]['Type'] = 'AWS::EC2::VPNConnection'
+        config.fragment['Resources'][name]['Properties'] = {}
+        config.fragment['Resources'][name]['Properties']['CustomerGatewayId'] = {}
+        config.fragment['Resources'][name]['Properties']['CustomerGatewayId'] = cgw
+        if bgp == 1:
+            config.fragment['Resources'][name]['Properties']['StaticRoutesOnly'] = 'False'
+        else:
+            config.fragment['Resources'][name]['Properties']['StaticRoutesOnly'] = 'True'
+        if vgtype == 'TGW':
+            config.fragment['Resources'][name]['Properties']['TransitGatewayId'] = {}
+            config.fragment['Resources'][name]['Properties']['TransitGatewayId'] = mygw
+        if vgtype == 'VGW':
+            config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = {}
+            config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = mygw
+        if dep != '':
+            config.fragment['Resources'][name]['DependsOn'] = {}
+            config.fragment['Resources'][name]['DependsOn'] = dep
+        config.fragment['Outputs'][name] = {}
+        config.fragment['Outputs'][name]['Description'] = 'VPN ID'
+        config.fragment['Outputs'][name + 'ID']['Value'] = {'Ref': name}
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('VPN Connection Creation Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
