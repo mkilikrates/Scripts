@@ -89,56 +89,80 @@ def main():
                 action = gateway.vpn('VPN',cgw,bgp,mygw,vpntype,dep)
             else:
                 myvpnopts = {}
-                if config.templateParameterValues['tunnel1insidecidrv4'] !='':
-                    myvpnopts['Tunnel1InsideCidr'] = config.templateParameterValues['tunnel1insidecidrv4']
-                if config.templateParameterValues['tunnel1insidecidrv6'] !='':
-                    myvpnopts['Tunnel1InsideIpv6Cidr'] = config.templateParameterValues['tunnel1insidecidrv6']
-                if config.templateParameterValues['tunnel1sharedkey'] !='':
-                    myvpnopts['Tunnel1PreSharedKey'] = config.templateParameterValues['tunnel1sharedkey']
-                if config.templateParameterValues['tunnel2insidecidrv4'] !='':
-                    myvpnopts['Tunnel2InsideCidr'] = config.templateParameterValues['tunnel2insidecidrv4']
-                if config.templateParameterValues['tunnel2insidecidrv6'] !='':
-                    myvpnopts['Tunnel2InsideIpv6Cidr'] = config.templateParameterValues['tunnel2insidecidrv6']
-                if config.templateParameterValues['tunnel2sharedkey'] !='':
-                    myvpnopts['Tunnel2PreSharedKey'] = config.templateParameterValues['tunnel2sharedkey']
-                if config.templateParameterValues['tunnelph1lifetime'] !='':
-                    myvpnopts['Phase1LifetimeSeconds'] = config.templateParameterValues['tunnelph1lifetime']
-                if config.templateParameterValues['tunnelph2lifetime'] !='':
-                    myvpnopts['Phase2LifetimeSeconds'] = config.templateParameterValues['tunnelph2lifetime']
-                if config.templateParameterValues['tunnelrekeymarg'] !='':
-                    myvpnopts['RekeyMarginTimeSeconds'] = config.templateParameterValues['tunnelrekeymarg']
-                if config.templateParameterValues['tunnelrekeyfuzz'] !='':
-                    myvpnopts['RekeyFuzzPercentage'] = config.templateParameterValues['tunnelrekeyfuzz']
-                if config.templateParameterValues['tunnelreplaywin'] !='':
-                    myvpnopts['ReplayWindowSize'] = config.templateParameterValues['tunnelreplaywin']
-                if config.templateParameterValues['tunneldpdtimeout'] !='':
-                    myvpnopts['DPDTimeoutSeconds'] = config.templateParameterValues['tunneldpdtimeout']
-                if config.templateParameterValues['tunneldpdact'] !='':
-                    myvpnopts['DPDTimeoutAction'] = config.templateParameterValues['tunneldpdact']
-                if config.templateParameterValues['tunnelencalg'] !='':
-                    myvpnopts['Phase1EncryptionAlgorithms'] = []
-                    myvpnopts['Phase1EncryptionAlgorithms'].append({'Value' : config.templateParameterValues['tunnelencalg']})
-                    myvpnopts['Phase2EncryptionAlgorithms'] = []
-                    myvpnopts['Phase2EncryptionAlgorithms'].append({'Value' : config.templateParameterValues['tunnelencalg']})
-                if config.templateParameterValues['tunnelintalg'] !='':
-                    myvpnopts['Phase1IntegrityAlgorithms'] = []
-                    myvpnopts['Phase1IntegrityAlgorithms'].append({'Value' : config.templateParameterValues['tunnelintalg']})
-                    myvpnopts['Phase2IntegrityAlgorithms'] = []
-                    myvpnopts['Phase2IntegrityAlgorithms'].append({'Value' : config.templateParameterValues['tunnelintalg']})
-                if config.templateParameterValues['tunneldhg'] !='':
-                    myvpnopts['Phase1DHGroupNumbers'] = []
-                    myvpnopts['Phase1DHGroupNumbers'].append({'Value' : config.templateParameterValues['tunneldhg']})
-                    myvpnopts['Phase2DHGroupNumbers'] = []
-                    myvpnopts['Phase2DHGroupNumbers'].append({'Value' : config.templateParameterValues['tunneldhg']})
-                if config.templateParameterValues['tunnelikev'] !='':
-                    myvpnopts['IKEVersions'] = []
-                    myvpnopts['IKEVersions'].append({'Value' : config.templateParameterValues['tunnelikev']})
-                    vpnaccel = config.templateParameterValues['vpnaccel']
-                    vpnipfamily = config.templateParameterValues['vpnipfamily']
+                vpnaccel = config.templateParameterValues['vpnaccel']
+                vpnipfamily = config.templateParameterValues['vpnipfamily']
+                myvpnopts['EnableAcceleration'] = {}
+                myvpnopts['EnableAcceleration'] = vpnaccel
+                myvpnopts['StaticRoutesOnly'] = {}
                 if bgp == 0:
-                    keylist = { 'Version' : 'V0.0.3', 'VPNConn' : { 'Customer-Gateway-Id' : cgw, 'Gateway-Type' : vpntype, 'Gateway-Id' : mygw, 'EnableAcceleration' : vpnaccel, 'StaticRoutesOnly' : 'True', 'TunnelInsideIpVersion' : vpnipfamily, 'VPNOptions' : myvpnopts} }
+                    myvpnopts['StaticRoutesOnly'] = 'True'
                 else:
-                    keylist = { 'Version' : 'V0.0.3', 'VPNConn' : { 'Customer-Gateway-Id' : cgw, 'Gateway-Type' : vpntype, 'Gateway-Id' : mygw, 'EnableAcceleration' : vpnaccel, 'StaticRoutesOnly' : 'False', 'TunnelInsideIpVersion' : vpnipfamily, 'VPNOptions' : myvpnopts} }
+                    myvpnopts['StaticRoutesOnly'] = 'False'
+                myvpnopts['TunnelInsideIpVersion'] = {}
+                myvpnopts['TunnelInsideIpVersion'] = vpnipfamily
+                myvpnopts['TunnelOptions'] = []
+                for i in range (1,2):
+                    if config.templateParameterValues['tunnel' + i + '1insidecidrv4'] !='':
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideCidr'] = {}
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideCidr'] = config.templateParameterValues['tunnel' + i + 'insidecidrv4']
+                    if config.templateParameterValues['tunnel' + i + 'insidecidrv6'] !='':
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideIpv6Cidr'] = {}
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideIpv6Cidr'] = config.templateParameterValues['tunnel' + i + 'insidecidrv6']
+                    if config.templateParameterValues['tunnel' + i + 'sharedkey'] !='':
+                        myvpnopts['TunnelOptions'][i]['PreSharedKey'] = {}
+                        myvpnopts['TunnelOptions'][i]['PreSharedKey'] = config.templateParameterValues['tunnel' + i + 'sharedkey']
+                    if config.templateParameterValues['tunnelph1lifetime'] !='':
+                        myvpnopts['TunnelOptions'][i]['Phase1LifetimeSeconds'] = {}
+                        myvpnopts['TunnelOptions'][i]['Phase1LifetimeSeconds'] = config.templateParameterValues['tunnelph1lifetime']
+                    if config.templateParameterValues['tunnelph2lifetime'] !='':
+                        myvpnopts['TunnelOptions'][i]['Phase2LifetimeSeconds'] = {}
+                        myvpnopts['TunnelOptions'][i]['Phase2LifetimeSeconds'] = config.templateParameterValues['tunnelph2lifetime']
+                    if config.templateParameterValues['tunnelrekeymarg'] !='':
+                        myvpnopts['TunnelOptions'][i]['RekeyMarginTimeSeconds'] = {}
+                        myvpnopts['TunnelOptions'][i]['RekeyMarginTimeSeconds'] = config.templateParameterValues['tunnelrekeymarg']
+                    if config.templateParameterValues['tunnelrekeyfuzz'] !='':
+                        myvpnopts['TunnelOptions'][i]['RekeyFuzzPercentage'] = {}
+                        myvpnopts['TunnelOptions'][i]['RekeyFuzzPercentage'] = config.templateParameterValues['tunnelrekeyfuzz']
+                    if config.templateParameterValues['tunnelreplaywin'] !='':
+                        myvpnopts['TunnelOptions'][i]['ReplayWindowSize'] = {}
+                        myvpnopts['TunnelOptions'][i]['ReplayWindowSize'] = config.templateParameterValues['tunnelreplaywin']
+                    if config.templateParameterValues['tunneldpdtimeout'] !='':
+                        myvpnopts['TunnelOptions'][i]['DPDTimeoutSeconds'] = {}
+                        myvpnopts['TunnelOptions'][i]['DPDTimeoutSeconds'] = config.templateParameterValues['tunneldpdtimeout']
+                    if config.templateParameterValues['tunneldpdact'] !='':
+                        myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = {}
+                        myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = config.templateParameterValues['tunneldpdact']
+                    if config.templateParameterValues['tunnelencalg'] !='':
+                        myvpnopts['TunnelOptions'][i]['Phase1EncryptionAlgorithms'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase1EncryptionAlgorithms'].append({'Value' : config.templateParameterValues['tunnelencalg']})
+                        myvpnopts['TunnelOptions'][i]['Phase2EncryptionAlgorithms'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase2EncryptionAlgorithms'].append({'Value' : config.templateParameterValues['tunnelencalg']})
+                    if config.templateParameterValues['tunnelintalg'] !='':
+                        myvpnopts['TunnelOptions'][i]['Phase1IntegrityAlgorithms'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase1IntegrityAlgorithms'].append({'Value' : config.templateParameterValues['tunnelintalg']})
+                        myvpnopts['TunnelOptions'][i]['Phase2IntegrityAlgorithms'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase2IntegrityAlgorithms'].append({'Value' : config.templateParameterValues['tunnelintalg']})
+                    if config.templateParameterValues['tunneldhg'] !='':
+                        myvpnopts['TunnelOptions'][i]['Phase1DHGroupNumbers'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase1DHGroupNumbers'].append({'Value' : config.templateParameterValues['tunneldhg']})
+                        myvpnopts['TunnelOptions'][i]['Phase2DHGroupNumbers'] = []
+                        myvpnopts['TunnelOptions'][i]['Phase2DHGroupNumbers'].append({'Value' : config.templateParameterValues['tunneldhg']})
+                    if config.templateParameterValues['tunnelikev'] !='':
+                        myvpnopts['TunnelOptions'][i]['IKEVersions'] = []
+                        myvpnopts['TunnelOptions'][i]['IKEVersions'].append({'Value' : config.templateParameterValues['tunnelikev']})
+                    if config.templateParameterValues['tunnelstartact'] !='':
+                        myvpnopts['TunnelOptions'][i]['StartupAction'] = {}
+                        myvpnopts['TunnelOptions'][i]['StartupAction'] = config.templateParameterValues['tunnelstartact']
+                myvpnopts['LocalIpv4NetworkCidr'] = {}
+                myvpnopts['LocalIpv4NetworkCidr'] = '0.0.0.0/0'
+                myvpnopts['RemoteIpv4NetworkCidr'] = {}
+                myvpnopts['RemoteIpv4NetworkCidr'] = '0.0.0.0/0'
+                if vpnipfamily == 'ipv6':
+                    myvpnopts['LocalIpv6NetworkCidr'] = {}
+                    myvpnopts['LocalIpv6NetworkCidr'] = '::/0'
+                    myvpnopts['RemoteIpv6NetworkCidr'] = {}
+                    myvpnopts['RemoteIpv6NetworkCidr'] = '::/0'
+                keylist = { 'Version' : 'V0.0.3', 'VPNConn' : { 'Customer-Gateway-Id' : cgw, 'Gateway-Type' : vpntype, 'Gateway-Id' : mygw, 'VPNOptions' : myvpnopts} }
                 action = customresource.create('VPNConn','arn:aws:lambda:eu-west-1:778501541840:function:CloudFormationCustomResources-CustResFunc-242OKZQ449P0','',keylist)
         else:
             if SGAction == 'Create SG':
