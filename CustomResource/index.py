@@ -1,6 +1,8 @@
 import config
 import action_V001
 import action_V002
+import action_V003
+import action_V004
 def handler(event, context):
     config.logger.info('event: {}'.format(event))
     config.logger.info('context: {}'.format(context))
@@ -23,6 +25,8 @@ def handler(event, context):
         config.logresId = event['LogicalResourceId']
         config.resproper = event['ResourceProperties']
         config.respurl = event['ResponseURL']
+        if config.reqtype != 'Create':
+            config.phyresId = event['PhysicalResourceId']
         if config.resproper['Version'] == 'V0.0.1':
             try:
                 action = action_V001.main()
@@ -38,6 +42,30 @@ def handler(event, context):
         if config.resproper['Version'] == 'V0.0.2':
             try:
                 action = action_V002.main()
+                config.logger.info('Response: {}'.format(action))
+                response["Reason"] = action["Reason"]
+                response["PhysicalResourceId"] = action["AllocationId"]
+                response["Data"] = action["Addresses"]
+            except Exception as e:
+                config.logger.error('ERROR: {}'.format(e))
+                config.traceback.print_exc()
+                response["Reason"] = str(e)
+                response["Status"] = "FAILED"
+        if config.resproper['Version'] == 'V0.0.3':
+            try:
+                action = action_V003.main()
+                config.logger.info('Response: {}'.format(action))
+                response["Reason"] = action["Reason"]
+                response["PhysicalResourceId"] = action["PhysicalResourceId"]
+                response["Data"] = action["VpnConnection"]
+            except Exception as e:
+                config.logger.error('ERROR: {}'.format(e))
+                config.traceback.print_exc()
+                response["Reason"] = str(e)
+                response["Status"] = "FAILED"
+        if config.resproper['Version'] == 'V0.0.4':
+            try:
+                action = action_V004.main()
                 config.logger.info('Response: {}'.format(action))
                 response["Reason"] = action["Reason"]
                 response["Data"] = action["Addresses"]

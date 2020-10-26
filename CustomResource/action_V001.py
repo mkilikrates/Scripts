@@ -5,7 +5,6 @@ def main():
     try:
         #locals
         nslist = []
-        dnslist = []
         directId = config.resproper['DirectoryId']
         action = ds.desc_ds(directId)
         config.logger.info('Action: {}'.format(action))

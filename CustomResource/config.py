@@ -15,4 +15,5 @@ stacktId = ''
 requestId = ''
 restype = ''
 logresId = ''
-resproper = ''
+phyresId = ''
+resproper = {}

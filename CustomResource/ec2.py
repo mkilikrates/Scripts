@@ -115,13 +115,13 @@ def delete_customer_gateway(region,cgwid):
         response["Reason"] = str(e)
     return response
 
-def create_vpn_connection(region,vpntype,cgwid,):
+def create_vpn_connection(region,keylist):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        customer_gateway = client_ec2.delete_customer_gateway(
-            CustomerGatewayId=cgwid
+        vpn_connection = client_ec2.create_vpn_connection(
+            keylist
         )
-        return customer_gateway
+        return vpn_connection
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -129,3 +129,19 @@ def create_vpn_connection(region,vpntype,cgwid,):
         response["statusCode"] = "500"
         response["Reason"] = str(e)
     return response
+
+def delete_vpn_connection(region,vpnid):
+    try:
+        client_ec2 = config.boto3.client('ec2', region_name=region)
+        vpn_connection = client_ec2.delete_vpn_connection(
+            VpnConnectionId=vpnid
+        )
+        return vpn_connection
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["Reason"] = str(e)
+    return response
+
