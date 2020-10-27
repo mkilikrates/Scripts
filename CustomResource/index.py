@@ -44,7 +44,7 @@ def handler(event, context):
                 action = action_V002.main()
                 config.logger.info('Response: {}'.format(action))
                 response["Reason"] = action["Reason"]
-                response["PhysicalResourceId"] = action["AllocationId"]
+                response["PhysicalResourceId"] = action["PhysicalResourceId"]
                 response["Data"] = action["Addresses"]
             except Exception as e:
                 config.logger.error('ERROR: {}'.format(e))

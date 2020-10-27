@@ -4,34 +4,28 @@ import ec2
 def main():
     try:
         #locals
-        region = config.resproper['Region']
-        domain = config.resproper['Domain']
+        region = config.resproper['AllocateAddress']['Region']
+        domain = config.resproper['AllocateAddress']['Domain']
+        response = {}
+        response['Addresses'] = {}
         if config.reqtype == 'Create':
             action = ec2.allocate_address(region,domain)
             config.logger.info('Action: {}'.format(action))
+            response["PhysicalResourceId"] = action['AllocationId']
         elif config.reqtype == 'Delete':
-            addr = []
-            addr.append(config.resproper['PublicIp'])
-            action = ec2.describe_addresses(region,addr)
-            config.logger.info('Action: {}'.format(action))
-            addraloc = action['Addresses']['AllocationId']
+            addraloc = config.phyresId
             action = ec2.release_address(region,addraloc)
             config.logger.info('Action: {}'.format(action))
+            response["PhysicalResourceId"] = 'None'
         else:
             config.logger.info('Action: Nothing to do here! - {}'.format(config.reqtype))
-        response = {}
-        response['Addresses'] = {}
         response['Addresses'] = action
-        action = {}
-        action["statusCode"] = "200"
-        action["Reason"] = ("Custom Resource found!")
-        action["Addresses"] = {}
-        action["Addresses"] = response['Addresses']
-        return action
+        response["Reason"] = action["Reason"]
+        response["statusCode"] = action["statusCode"]
     except Exception as e:
-        action = {}
+        response = {}
         config.logger.error('ERROR: {}'.format(e))
         config.traceback.print_exc()
-        action["statusCode"] = "500"
-        action["Reason"] = str(e)
-    return action
+        response["statusCode"] = "500"
+        response["Reason"] = str(e)
+    return response

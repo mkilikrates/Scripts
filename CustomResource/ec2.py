@@ -2,10 +2,12 @@ import config
 def allocate_address(region,domain):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        address = client_ec2.allocate_address(
+        response = client_ec2.allocate_address(
             Domain=domain
         )
-        return address
+        response["statusCode"] = "200"
+        response["Reason"] = ("IP allocation succeed!")
+        return response
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -17,10 +19,11 @@ def allocate_address(region,domain):
 def describe_addresses(region,addr):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        address = client_ec2.describe_addresses(
+        response = client_ec2.describe_addresses(
             PublicIps=addr
         )
-        return address
+        response["statusCode"] = "200"
+        response["Reason"] = ("IP allocation succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -32,10 +35,11 @@ def describe_addresses(region,addr):
 def release_address(region,alocid):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        address = client_ec2.release_address(
+        response = client_ec2.release_address(
             AllocationId=alocid
         )
-        return address
+        response["statusCode"] = "200"
+        response["Reason"] = ("IP deallocation succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -47,7 +51,7 @@ def release_address(region,alocid):
 def create_customer_gateway(region,name,asn,cert):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        customer_gateway = client_ec2.create_customer_gateway(
+        response = client_ec2.create_customer_gateway(
             BgpAsn=asn,
             CertificateArn=cert,
             Type='ipsec.1',
@@ -63,7 +67,8 @@ def create_customer_gateway(region,name,asn,cert):
                 }
             ]
         )
-        return customer_gateway
+        response["statusCode"] = "200"
+        response["Reason"] = ("CGW Creation succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -75,7 +80,7 @@ def create_customer_gateway(region,name,asn,cert):
 def describe_customer_gateways(region,name,asn,cert):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        customer_gateway = client_ec2.describe_customer_gateways(
+        response = client_ec2.describe_customer_gateways(
             Filters=[
                 {
                     'Name': 'tag:DeviceName',
@@ -91,7 +96,8 @@ def describe_customer_gateways(region,name,asn,cert):
                 }
             ]
         )
-        return customer_gateway
+        response["statusCode"] = "200"
+        response["Reason"] = ("CGW description succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -103,10 +109,11 @@ def describe_customer_gateways(region,name,asn,cert):
 def delete_customer_gateway(region,cgwid):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        customer_gateway = client_ec2.delete_customer_gateway(
+        response = client_ec2.delete_customer_gateway(
             CustomerGatewayId=cgwid
         )
-        return customer_gateway
+        response["statusCode"] = "200"
+        response["Reason"] = ("CGW removed succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -118,10 +125,12 @@ def delete_customer_gateway(region,cgwid):
 def create_vpn_connection(region,keylist):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        vpn_connection = client_ec2.create_vpn_connection(
-            keylist
+        config.logger.info('Args: {}'.format(keylist))
+        response = client_ec2.create_vpn_connection(
+            keylist['data']
         )
-        return vpn_connection
+        response["statusCode"] = "200"
+        response["Reason"] = ("VPN Creation succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))
@@ -133,10 +142,11 @@ def create_vpn_connection(region,keylist):
 def delete_vpn_connection(region,vpnid):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
-        vpn_connection = client_ec2.delete_vpn_connection(
+        response = client_ec2.delete_vpn_connection(
             VpnConnectionId=vpnid
         )
-        return vpn_connection
+        response["statusCode"] = "200"
+        response["Reason"] = ("VPN removed succeed!")
     except Exception as e:
         response = {}
         config.logger.error('ERROR: {}'.format(e))

@@ -52,7 +52,7 @@ def vgw(name,asn,desc,vgtype,bgp,dep):
             config.fragment['Resources'][name]['DependsOn'] = dep
         config.fragment['Outputs'][name] = {}
         config.fragment['Outputs'][name]['Description'] = 'VGW ID'
-        config.fragment['Outputs'][name + 'ID']['Value'] = {'Ref': name}
+        config.fragment['Outputs'][name]['Value'] = {'Ref': name}
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('VGW Creation Success!')
@@ -81,8 +81,8 @@ def tgw(name,asn,desc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multi
         config.fragment['Resources'][name]['Properties']['DefaultRouteTablePropagation'] = defrtprop
         config.fragment['Resources'][name]['Properties']['DnsSupport'] = {}
         config.fragment['Resources'][name]['Properties']['DnsSupport'] = dnssup
-        config.fragment['Resources'][name]['Properties']['MulticastSupport'] = {}
-        config.fragment['Resources'][name]['Properties']['MulticastSupport'] = multicastsup
+        #config.fragment['Resources'][name]['Properties']['MulticastSupport'] = {}
+        #config.fragment['Resources'][name]['Properties']['MulticastSupport'] = multicastsup
         config.fragment['Resources'][name]['Properties']['VpnEcmpSupport'] = {}
         config.fragment['Resources'][name]['Properties']['VpnEcmpSupport'] = ecmpsup
         if desc !='':
@@ -95,7 +95,7 @@ def tgw(name,asn,desc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multi
             config.fragment['Resources'][name]['DependsOn'] = dep
         config.fragment['Outputs'][name] = {}
         config.fragment['Outputs'][name]['Description'] = 'TGW ID'
-        config.fragment['Outputs'][name + 'ID']['Value'] = {'Ref': name}
+        config.fragment['Outputs'][name]['Value'] = {'Ref': name}
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('TGW Creation Success!')
@@ -140,7 +140,7 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
         config.fragment['Resources'][name]['Type'] = 'AWS::EC2::CustomerGateway'
         config.fragment['Resources'][name]['Properties'] = {}
         config.fragment['Resources'][name]['Properties']['IpAddress'] = {}
-        config.fragment['Resources'][name]['Properties']['IpAddress'] = vgtype
+        config.fragment['Resources'][name]['Properties']['IpAddress'] = addr
         config.fragment['Resources'][name]['Properties']['BgpAsn'] = {}
         if bgp == 1:
             config.fragment['Resources'][name]['Properties']['BgpAsn'] = asn
@@ -152,8 +152,8 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
             config.fragment['Resources'][name]['DependsOn'] = {}
             config.fragment['Resources'][name]['DependsOn'] = dep
         config.fragment['Outputs'][name] = {}
-        config.fragment['Outputs'][name]['Description'] = 'VGW ID'
-        config.fragment['Outputs'][name + 'ID']['Value'] = {'Ref': name}
+        config.fragment['Outputs'][name]['Description'] = 'CGW ID'
+        config.fragment['Outputs'][name]['Value'] = {'Ref': name}
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('VGW Creation Success!')
@@ -182,12 +182,14 @@ def vpn(name,cgw,bgp,mygw,vgtype,dep):
         if vgtype == 'VGW':
             config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = {}
             config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = mygw
+        config.fragment['Resources'][name]['Properties']['Type'] = {}
+        config.fragment['Resources'][name]['Properties']['Type'] = 'ipsec.1'
         if dep != '':
             config.fragment['Resources'][name]['DependsOn'] = {}
             config.fragment['Resources'][name]['DependsOn'] = dep
         config.fragment['Outputs'][name] = {}
         config.fragment['Outputs'][name]['Description'] = 'VPN ID'
-        config.fragment['Outputs'][name + 'ID']['Value'] = {'Ref': name}
+        config.fragment['Outputs'][name]['Value'] = {'Ref': name}
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('VPN Connection Creation Success!')
