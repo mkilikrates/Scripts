@@ -126,9 +126,7 @@ def create_vpn_connection(region,keylist):
     try:
         client_ec2 = config.boto3.client('ec2', region_name=region)
         config.logger.info('Args: {}'.format(keylist))
-        response = client_ec2.create_vpn_connection(
-            keylist['data']
-        )
+        response = client_ec2.create_vpn_connection(**keylist)
         response["statusCode"] = "200"
         response["Reason"] = ("VPN Creation succeed!")
     except Exception as e:

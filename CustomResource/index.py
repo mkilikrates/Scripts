@@ -57,7 +57,7 @@ def handler(event, context):
                 config.logger.info('Response: {}'.format(action))
                 response["Reason"] = action["Reason"]
                 response["PhysicalResourceId"] = action["PhysicalResourceId"]
-                response["Data"] = action["VpnConnection"]
+                response["Data"] = action["VPNConn"]
             except Exception as e:
                 config.logger.error('ERROR: {}'.format(e))
                 config.traceback.print_exc()
