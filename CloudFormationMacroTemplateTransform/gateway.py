@@ -81,8 +81,8 @@ def tgw(name,asn,desc,bgp,autoacceptshrdattach,defrtassoc,defrtprop,dnssup,multi
         config.fragment['Resources'][name]['Properties']['DefaultRouteTablePropagation'] = defrtprop
         config.fragment['Resources'][name]['Properties']['DnsSupport'] = {}
         config.fragment['Resources'][name]['Properties']['DnsSupport'] = dnssup
-        #config.fragment['Resources'][name]['Properties']['MulticastSupport'] = {}
-        #config.fragment['Resources'][name]['Properties']['MulticastSupport'] = multicastsup
+        config.fragment['Resources'][name]['Properties']['MulticastSupport'] = {}
+        config.fragment['Resources'][name]['Properties']['MulticastSupport'] = multicastsup
         config.fragment['Resources'][name]['Properties']['VpnEcmpSupport'] = {}
         config.fragment['Resources'][name]['Properties']['VpnEcmpSupport'] = ecmpsup
         if desc !='':

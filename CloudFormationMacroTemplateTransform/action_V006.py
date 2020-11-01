@@ -98,20 +98,31 @@ def main():
                     myvpnopts['StaticRoutesOnly'] = True
                 else:
                     myvpnopts['StaticRoutesOnly'] = False
-                myvpnopts['TunnelInsideIpVersion'] = {}
-                myvpnopts['TunnelInsideIpVersion'] = vpnipfamily
+                if vpntype == 'TGW':
+                    myvpnopts['TunnelInsideIpVersion'] = {}
+                    myvpnopts['TunnelInsideIpVersion'] = vpnipfamily
+#                if vpnipfamily == 'ipv4' and vpntype == 'TGW':
+#                    myvpnopts['LocalIpv4NetworkCidr'] = {}
+#                    myvpnopts['LocalIpv4NetworkCidr'] = '0.0.0.0/0'
+#                    myvpnopts['RemoteIpv4NetworkCidr'] = {}
+#                    myvpnopts['RemoteIpv4NetworkCidr'] = '0.0.0.0/0'
+#                if vpnipfamily == 'ipv6' and vpntype == 'TGW':
+#                    myvpnopts['LocalIpv6NetworkCidr'] = {}
+#                    myvpnopts['LocalIpv6NetworkCidr'] = '::/0'
+#                    myvpnopts['RemoteIpv6NetworkCidr'] = {}
+#                    myvpnopts['RemoteIpv6NetworkCidr'] = '::/0'
                 myvpnopts['TunnelOptions'] = []
                 for i in range (2):
                     myvpnopts['TunnelOptions'].append({})
                     if config.templateParameterValues['tunnel' + str(i) + 'insidecidrv4'] !='':
                         myvpnopts['TunnelOptions'][i]['TunnelInsideCidr'] = {}
-                        myvpnopts['TunnelOptions'][i]['TunnelInsideCidr'] = {'Ref' : 'insidecidrv4'}
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideCidr'] = {'Ref' : 'tunnel' + str(i) + 'insidecidrv4'}
                     if config.templateParameterValues['tunnel' + str(i) + 'insidecidrv6'] !='':
                         myvpnopts['TunnelOptions'][i]['TunnelInsideIpv6Cidr'] = {}
-                        myvpnopts['TunnelOptions'][i]['TunnelInsideIpv6Cidr'] = {'Ref' : 'insidecidrv6'}
+                        myvpnopts['TunnelOptions'][i]['TunnelInsideIpv6Cidr'] = {'Ref' : 'tunnel' + str(i) + 'insidecidrv6'}
                     if config.templateParameterValues['tunnel' + str(i) + 'sharedkey'] !='':
                         myvpnopts['TunnelOptions'][i]['PreSharedKey'] = {}
-                        myvpnopts['TunnelOptions'][i]['PreSharedKey'] = {'Ref' : 'sharedkey'}
+                        myvpnopts['TunnelOptions'][i]['PreSharedKey'] = {'Ref' : 'tunnel' + str(i) + 'sharedkey'}
                     if config.templateParameterValues['tunnelph1lifetime'] != '':
                         myvpnopts['TunnelOptions'][i]['Phase1LifetimeSeconds'] = {}
                         myvpnopts['TunnelOptions'][i]['Phase1LifetimeSeconds'] = {'Ref' : 'tunnelph1lifetime'}
@@ -130,9 +141,9 @@ def main():
                     if config.templateParameterValues['tunneldpdtimeout'] != '':
                         myvpnopts['TunnelOptions'][i]['DPDTimeoutSeconds'] = {}
                         myvpnopts['TunnelOptions'][i]['DPDTimeoutSeconds'] = {'Ref' : 'tunneldpdtimeout'}
-                    #if config.templateParameterValues['tunneldpdact'] != '':
-                    #    myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = {}
-                    #    myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = {'Ref' : 'tunneldpdact'}
+#                    if config.templateParameterValues['tunneldpdact'] != '' and vpntype == 'TGW':
+#                        myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = {}
+#                        myvpnopts['TunnelOptions'][i]['DPDTimeoutAction'] = {'Ref' : 'tunneldpdact'}
                     if config.templateParameterValues['tunnelencalg'] != '':
                         myvpnopts['TunnelOptions'][i]['Phase1EncryptionAlgorithms'] = []
                         myvpnopts['TunnelOptions'][i]['Phase1EncryptionAlgorithms'].append({'Value' : {'Ref' : 'tunnelencalg'}})
@@ -151,18 +162,9 @@ def main():
                     if config.templateParameterValues['tunnelikev'] != '':
                         myvpnopts['TunnelOptions'][i]['IKEVersions'] = []
                         myvpnopts['TunnelOptions'][i]['IKEVersions'].append({'Value' : {'Ref' : 'tunnelikev'}})
-                    #if config.templateParameterValues['tunnelstartact'] != '':
-                    #    myvpnopts['TunnelOptions'][i]['StartupAction'] = {}
-                    #    myvpnopts['TunnelOptions'][i]['StartupAction'] = {'Ref' : 'tunnelstartact'}
-                #myvpnopts['LocalIpv4NetworkCidr'] = {}
-                #myvpnopts['LocalIpv4NetworkCidr'] = '0.0.0.0/0'
-                #myvpnopts['RemoteIpv4NetworkCidr'] = {}
-                #myvpnopts['RemoteIpv4NetworkCidr'] = '0.0.0.0/0'
-                #if vpnipfamily == 'ipv6':
-                #    myvpnopts['LocalIpv6NetworkCidr'] = {}
-                #    myvpnopts['LocalIpv6NetworkCidr'] = '::/0'
-                #    myvpnopts['RemoteIpv6NetworkCidr'] = {}
-                #    myvpnopts['RemoteIpv6NetworkCidr'] = '::/0'
+ #                   if config.templateParameterValues['tunnelstartact'] != '' and vpntype == 'TGW':
+ #                       myvpnopts['TunnelOptions'][i]['StartupAction'] = {}
+ #                       myvpnopts['TunnelOptions'][i]['StartupAction'] = {'Ref' : 'tunnelstartact'}
                 keylist = { 'Version' : 'V0.0.3', 'VPNConn' : { 'Customer-Gateway-Id' : cgw, 'Gateway-Type' : vpntype, 'Gateway-Id' : mygw, 'VPNOptions' : myvpnopts} }
                 action = customresource.create('VPNConn','arn:aws:lambda:eu-west-1:778501541840:function:CloudFormationCustomResources-CustResFunc-242OKZQ449P0','',keylist)
         else:

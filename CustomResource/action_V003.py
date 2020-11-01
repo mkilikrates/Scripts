@@ -86,12 +86,12 @@ def main():
             elif gwtype == 'TGW':
                 keylist = {}
                 keylist = {}
-                keylist['TransitGatewayId'] = {}
-                keylist['TransitGatewayId'] = cgwid
+                keylist['CustomerGatewayId'] = {}
+                keylist['CustomerGatewayId'] = cgwid
                 keylist['Type'] = {}
                 keylist['Type'] = 'ipsec.1'
-                keylist['VpnGatewayId'] = {}
-                keylist['VpnGatewayId'] = gwid
+                keylist['TransitGatewayId'] = {}
+                keylist['TransitGatewayId'] = gwid
                 keylist['Options'] = {}
                 keylist['Options'] = vpnopts
             action = ec2.create_vpn_connection(region,keylist)
