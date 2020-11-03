@@ -28,5 +28,3 @@ def main(vpcname,name,DualStack):
         response["statusCode"] = "500"
         response["body"] = str(e)
     return response
-
-

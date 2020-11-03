@@ -54,6 +54,10 @@ def addingress(sg,src,srctype,proto,fromport,toport,desc):
             sgname = sg.replace('-','')
         else:
             sgname = sg
+        if proto != '-1':
+            sgname = sgname + proto
+        if fromport != '-1' and fromport != '':
+            sgname = sgname + fromport
         config.fragment['Resources']['SGRule' + sgname + srcname] = {}
         config.fragment['Resources']['SGRule' + sgname + srcname]['Type'] = 'AWS::EC2::SecurityGroupIngress'
         config.fragment['Resources']['SGRule' + sgname + srcname]['Properties'] = {}

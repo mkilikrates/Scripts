@@ -165,6 +165,7 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
         response["statusCode"] = "500"
         response["body"] = str(e)
     return response
+
 def vpn(name,cgw,bgp,mygw,vgtype,dep):
     try:
         config.fragment['Resources'][name] = {}
@@ -193,6 +194,99 @@ def vpn(name,cgw,bgp,mygw,vgtype,dep):
         response = {}
         response["statusCode"] = "200"
         response["body"] = config.json.dumps('VPN Connection Creation Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
+
+def eip(vpcname,name,dep):
+    # Where:
+    # name = prefix name eg: FE will get subnet resource FESubAZ1a
+    # AZ = Availability zone
+    try:
+        config.fragment['Resources']['EIP' + vpcname + name] = {}
+        config.fragment['Resources']['EIP' + vpcname + name]['Type'] = 'AWS::EC2::EIP'
+        config.fragment['Resources']['EIP' + vpcname + name]['Properties'] = {}
+        config.fragment['Resources']['EIP' + vpcname + name]['Properties']['Domain'] = {}
+        config.fragment['Resources']['EIP' + vpcname + name]['Properties']['Domain'] = 'Vpc' + vpcname
+        config.fragment['Resources']['EIP' + vpcname + name]['Properties']['Tags'] = {}
+        config.fragment['Resources']['EIP' + vpcname + name]['Properties']['Tags'] = [{'Key': 'Name', 'Value': {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'EIP' + vpcname + name ] ] } }, {'Key': 'StackName', 'Value': {'Ref': 'AWS::StackName'}}]
+        if dep != '':
+            config.fragment['Resources']['EIP' + vpcname + name]['DependsOn'] = {}
+            config.fragment['Resources']['EIP' + vpcname + name]['DependsOn'] = dep
+        config.fragment['Outputs']['EIP' + vpcname + name] = {}
+        config.fragment['Outputs']['EIP' + vpcname + name]['Description'] = 'Elastic IP for ' + name
+        config.fragment['Outputs']['EIP' + vpcname + name]['Value'] = {'Ref': 'EIP' + vpcname + name}
+        config.fragment['Outputs']['EIP' + vpcname + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'EIP' + vpcname + name ] ] } }
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('EIP Allocation Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
+
+def eipass(name,instid,enid,pvtip,allocid,dep):
+    # Where:
+    # name = prefix name eg: FE will get subnet resource FESubAZ1a
+    # AZ = Availability zone
+    try:
+        config.fragment['Resources']['EIPASS' + name] = {}
+        config.fragment['Resources']['EIPASS' + name]['Type'] = 'AWS::EC2::EIPAssociation'
+        config.fragment['Resources']['EIPASS' + name]['Properties'] = {}
+        config.fragment['Resources']['EIPASS' + name]['Properties']['AllocationId'] = {}
+        config.fragment['Resources']['EIPASS' + name]['Properties']['AllocationId'] = allocid
+        if instid != '':
+            config.fragment['Resources']['EIPASS' + name]['Properties']['InstanceId'] = {}
+            config.fragment['Resources']['EIPASS' + name]['Properties']['InstanceId'] = instid
+        else:
+            config.fragment['Resources']['EIPASS' + name]['Properties']['NetworkInterfaceId'] = {}
+            config.fragment['Resources']['EIPASS' + name]['Properties']['NetworkInterfaceId'] = enid
+            if pvtip != '':
+                config.fragment['Resources']['EIPASS' + name]['Properties']['PrivateIpAddress'] = {}
+                config.fragment['Resources']['EIPASS' + name]['Properties']['PrivateIpAddress'] = enid
+        if dep != '':
+            config.fragment['Resources']['EIPASS' + name]['DependsOn'] = {}
+            config.fragment['Resources']['EIPASS' + name]['DependsOn'] = dep
+        config.fragment['Outputs']['EIPASS' + name] = {}
+        config.fragment['Outputs']['EIPASS' + name]['Description'] = 'Elastic IP for ' + name
+        config.fragment['Outputs']['EIPASS' + name]['Value'] = {'Ref': 'EIPASS'  + name}
+        config.fragment['Outputs']['EIPASS' + name]['Export'] = { "Name" : {"Fn::Join" : [ "-", [ { "Ref": "AWS::StackName" } , 'EIPASS'  + name ] ] } }
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('EIP Allocation Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
+
+def vgwattch(name,vgw,vpc):
+    try:
+        config.fragment['Resources'][name] = {}
+        config.fragment['Resources'][name]['Type'] = 'AWS::EC2::VPCGatewayAttachment'
+        config.fragment['Resources'][name]['Properties'] = {}
+        config.fragment['Resources'][name]['Properties']['VpcId'] = {}
+        config.fragment['Resources'][name]['Properties']['VpcId'] = vpc
+        config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = {}
+        config.fragment['Resources'][name]['Properties']['VpnGatewayId'] = vgw
+        config.fragment['Outputs'][name] = {}
+        config.fragment['Outputs'][name]['Description'] = 'VGW Attachment ID'
+        config.fragment['Outputs'][name]['Value'] = {'Ref': name}
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('VGW Creation Success!')
         return response
     except Exception as e:
         response = {}

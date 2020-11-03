@@ -61,3 +61,27 @@ def addv6(name,dst,RTname,gwtype,gw):
         response["body"] = str(e)
     return response
 
+def prop(name,rtids,vgw,dep):
+    try:
+        config.fragment['Resources']['RTPROP' + name] = {}
+        config.fragment['Resources']['RTPROP' + name]['Type'] = 'AWS::EC2::VPNGatewayRoutePropagation'
+        config.fragment['Resources']['RTPROP' + name]['Properties'] = {}
+        config.fragment['Resources']['RTPROP' + name]['Properties']['RouteTableIds'] = []
+        config.fragment['Resources']['RTPROP' + name]['Properties']['RouteTableIds'] = rtids
+        config.fragment['Resources']['RTPROP' + name]['Properties']['VpnGatewayId'] = {}
+        config.fragment['Resources']['RTPROP' + name]['Properties']['VpnGatewayId'] = vgw
+        if dep != '':
+            config.fragment['Resources']['RTPROP' + name]['DependsOn'] = {}
+            config.fragment['Resources']['RTPROP' + name]['DependsOn'] = dep
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('Route Table Propagation' + name + ' Creation Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
+
