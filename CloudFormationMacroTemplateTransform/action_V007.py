@@ -128,6 +128,15 @@ def main():
             config.logger.info('Response: {}'.format(action))
             action = securitygroup.addingress('SecG' + 'InstanceTest' + onpremname,srcprefix,'SourcePrefixListId','-1','','','')
             config.logger.info('Response: {}'.format(action))
+        # create rules to access test instances from each other
+        action = securitygroup.addingress('SecG' + 'InstanceTest' + vpcname,onpremcidr,'CidrIp','-1','','','')
+        config.logger.info('Response: {}'.format(action))
+        action = securitygroup.addingress('SecG' + 'InstanceTest' + vpcname,vpccidr,'CidrIp','-1','','','')
+        config.logger.info('Response: {}'.format(action))
+        action = securitygroup.addingress('SecG' + 'InstanceTest' + onpremname,onpremcidr,'CidrIp','-1','','','')
+        config.logger.info('Response: {}'.format(action))
+        action = securitygroup.addingress('SecG' + 'InstanceTest' + onpremname,vpccidr,'CidrIp','-1','','','')
+        config.logger.info('Response: {}'.format(action))
         # create rules to VPN SRV
         action = securitygroup.addingress('SecG' + 'VPNSrv' + onpremname,'0.0.0.0/0','CidrIp','icmp','-1','-1','icmp')
         config.logger.info('Response: {}'.format(action))
@@ -279,8 +288,7 @@ def main():
         action = gateway.eipass('VPNSRV',instid,'','',allocid,dep)
         config.logger.info('Response: {}'.format(action))
         # create route to VPC on Onprem
-        vpninstid = {'Ref' : 'VPNSRV' + onpremname}
-        action = route.addv4(vpcname,vpccidr,'RTDefault' + onpremname,'InstanceId',vpninstid)
+        action = route.addv4(vpcname,vpccidr,'RTDefault' + onpremname,'InstanceId','VPNSRV' + onpremname)
         config.logger.info('Response: {}'.format(action))
         action = {}
         action["statusCode"] = "200"
