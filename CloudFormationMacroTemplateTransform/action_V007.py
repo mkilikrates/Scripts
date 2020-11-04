@@ -37,11 +37,11 @@ def main():
         config.logger.info('Response: {}'.format(action))
         # create VPC subnets
         subcidr = { "Fn::Select" : [ 0, { "Fn::Cidr" : [ vpccidr, 6, 6 ] } ] }
-        az = { "Fn::Select": [ 0, { "Fn::GetAZs": config.region } ] }
+        az = { "Fn::Select": [ 0, { "Fn::GetAZs": { "Ref" : "AWS::Region" } } ] }
         action = createsubnet.static(vpcname,'Subnet1',subcidr,az,'No','Pub','','RTDefault' + vpcname,'Vpc' + vpcname)
         config.logger.info('Response: {}'.format(action))
         subcidr = { "Fn::Select" : [ 1, { "Fn::Cidr" : [ vpccidr, 6, 6 ] } ] }
-        az = { "Fn::Select": [ 1, { "Fn::GetAZs": config.region } ] }
+        az = { "Fn::Select": [ 1, { "Fn::GetAZs": { "Ref" : "AWS::Region" } } ] }
         action = createsubnet.static(vpcname,'Subnet2',subcidr,az,'No','Pub','','RTDefault' + vpcname,'Vpc' + vpcname)
         config.logger.info('Response: {}'.format(action))
         #create OnPrem
@@ -58,11 +58,11 @@ def main():
         config.logger.info('Response: {}'.format(action))
         # create OnPrem subnets
         subcidr = { "Fn::Select" : [ 0, { "Fn::Cidr" : [ onpremcidr, 6, 6 ] } ] }
-        az = { "Fn::Select": [ 0, { "Fn::GetAZs": config.region } ] }
+        az = { "Fn::Select": [ 0, { "Fn::GetAZs": { "Ref" : "AWS::Region" } } ] }
         action = createsubnet.static(onpremname,'Subnet1',subcidr,az,'No','Pub','','RTDefault' + onpremname,'Vpc' + onpremname)
         config.logger.info('Response: {}'.format(action))
         subcidr = { "Fn::Select" : [ 1, { "Fn::Cidr" : [ onpremcidr, 6, 6 ] } ] }
-        az = { "Fn::Select": [ 1, { "Fn::GetAZs": config.region } ] }
+        az = { "Fn::Select": [ 1, { "Fn::GetAZs": { "Ref" : "AWS::Region" } } ] }
         action = createsubnet.static(onpremname,'Subnet2',subcidr,az,'No','Pub','','RTDefault' + onpremname,'Vpc' + onpremname)
         config.logger.info('Response: {}'.format(action))
         # allocate EIP OnPrem VPNSRV
@@ -138,7 +138,6 @@ def main():
         action = securitygroup.addingress('SecG' + 'VPNSrv' + onpremname,'0.0.0.0/0','CidrIp','50','','','ESP')
         config.logger.info('Response: {}'.format(action))
         # create instance test VPC
-        usrdata = 'simple_tshoot'
         vpcintproper = {}
         vpcintproper['DisableApiTermination'] = {}
         vpcintproper['DisableApiTermination'] = 'false'
@@ -150,21 +149,26 @@ def main():
             'DeviceIndex' : 0,
             'DeleteOnTermination' : 'true',
             'SubnetId' : {'Ref' : vpcname + 'Subnet1' },
-            'GroupSet' : [{'Ref': 'SecG' + 'InstanceTest' + vpcname}]
+            'GroupSet' : [{ 'Ref': 'SecG' + 'InstanceTest' + vpcname}]
             } ]
-        vpcintproper['IamInstanceProfile'] = {}
-        vpcintproper['IamInstanceProfile'] = {'Ref' : 'InstProfVPNSrv'}
         vpcintproper['ImageId'] = {}
         vpcintproper['ImageId'] = ami
         vpcintproper['InstanceType'] = {}
         vpcintproper['InstanceType'] = traffsize
         vpcintproper['Monitoring'] = {}
         vpcintproper['Monitoring'] = 'false'
-        if usrdata !='None':
-            vpcintproper['UserData'] = {}
-            data = open(usrdata + ".cfg", "r").read()
-            encoded = base64.b64encode(data.encode("utf-8"))
-            vpcintproper['UserData'] = encoded
+        userdata = { "Fn::Base64": { "Fn::Join": [ "", [
+           "#!/bin/bash -xe\n",
+           "amazon-linux-extras install -y epel\n",
+           "yum install -y openssl-devel xz xz-devel libffi-devel findutils wireshark tcpdump whois nuttcp iperf3 hping3 nmap sipcalc mtr bind-utils telnet\n",
+           "yum update -y\n",
+           "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
+           "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
+           "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
+           "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+           "systemctl restart sshd.service\n",
+           "reboot\n" ] ] } }
+        vpcintproper['UserData'] = userdata
         vpcintproper['Tags'] = []
         vpcintproper['Tags'] = [ {'Key': 'Name', 'Value': 'InstTest' + vpcname } ]
         dep = [vpcname + 'Subnet1', 'SecG' + 'InstanceTest' + vpcname]
@@ -182,7 +186,7 @@ def main():
             'DeviceIndex' : 0,
             'DeleteOnTermination' : 'true',
             'SubnetId' : {'Ref' : onpremname + 'Subnet1' },
-            'GroupSet' : [{'Ref': 'SecG' + 'InstanceTest' + onpremname}]
+            'GroupSet' : [{ 'Ref': 'SecG' + 'InstanceTest' + onpremname}]
             } ]
         onpremintproper['ImageId'] = {}
         onpremintproper['ImageId'] = ami
@@ -190,11 +194,18 @@ def main():
         onpremintproper['InstanceType'] = traffsize
         onpremintproper['Monitoring'] = {}
         onpremintproper['Monitoring'] = 'false'
-        if usrdata !='None':
-            onpremintproper['UserData'] = {}
-            data = open(usrdata + ".cfg", "r").read()
-            encoded = base64.b64encode(data.encode("utf-8"))
-            onpremintproper['UserData'] = encoded
+        userdata = { "Fn::Base64": { "Fn::Join": [ "", [
+           "#!/bin/bash -xe\n",
+           "amazon-linux-extras install -y epel\n",
+           "yum install -y openssl-devel xz xz-devel libffi-devel findutils wireshark tcpdump whois nuttcp iperf3 hping3 nmap sipcalc mtr bind-utils telnet\n",
+           "yum update -y\n",
+           "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
+           "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
+           "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
+           "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+           "systemctl restart sshd.service\n",
+           "reboot\n" ] ] } }
+        onpremintproper['UserData'] = userdata
         onpremintproper['Tags'] = []
         onpremintproper['Tags'] = [ {'Key': 'Name', 'Value': 'InstTest' + onpremname } ]
         dep = [onpremname + 'Subnet1', 'SecG' + 'InstanceTest' + onpremname]
@@ -208,6 +219,8 @@ def main():
         onpremintproper['InstanceInitiatedShutdownBehavior'] = 'terminate'
         onpremintproper['SourceDestCheck'] = {}
         onpremintproper['SourceDestCheck'] = 'false'
+        onpremintproper['IamInstanceProfile'] = {}
+        onpremintproper['IamInstanceProfile'] = {'Ref' : 'InstProfVPNSrv'}
         onpremintproper['NetworkInterfaces'] = []
         onpremintproper['NetworkInterfaces'] = [ {
             'AssociatePublicIpAddress' : 'false',
@@ -226,8 +239,7 @@ def main():
            "#!/bin/bash -xe\n",
            "amazon-linux-extras install -y epel\n",
            "yum install -y strongswan quagga python2-boto3 python-xmltodict git\n",
-           "export REGION_ID=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`"
-           "aws configure --profile default set region $REGION_ID\n",
+           "aws configure --profile default set region ", { "Ref" : "AWS::Region" }, "\n",
            "yum update -y\n",
            "git clone https://github.com/mkilikrates/launchvpn.git\n",
            "cd launchvpn\n",
@@ -248,7 +260,12 @@ def main():
            "systemctl enable strongswan\n",
            "systemctl enable zebra\n",
            "systemctl enable bgpd\n",
-           "reboot" ] ] } }
+           "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
+           "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
+           "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
+           "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+           "systemctl restart sshd.service\n",
+           "reboot\n" ] ] } }
         onpremintproper['UserData'] = userdata
         onpremintproper['Tags'] = []
         onpremintproper['Tags'] = [ {'Key': 'Name', 'Value': 'VPNSRV' + onpremname } ]
@@ -260,6 +277,10 @@ def main():
         instid = {'Ref' : 'VPNSRV' + onpremname}
         dep = ['VPNSRV' + onpremname, 'EIP' + onpremname + 'VPNSRV']
         action = gateway.eipass('VPNSRV',instid,'','',allocid,dep)
+        config.logger.info('Response: {}'.format(action))
+        # create route to VPC on Onprem
+        vpninstid = {'Ref' : 'VPNSRV' + onpremname}
+        action = route.addv4(vpcname,vpccidr,'RTDefault' + onpremname,'InstanceId',vpninstid)
         config.logger.info('Response: {}'.format(action))
         action = {}
         action["statusCode"] = "200"
