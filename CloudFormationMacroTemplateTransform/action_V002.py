@@ -74,9 +74,9 @@ def main():
                     if ip.version == 6:
                         action = securitygroup.addingress(SecurityGroup[0],ip,'CidrIpv6','-1','','','')
                         config.logger.info('Response: {}'.format(action))
-            sg = [ {'Ref': 'SecurityGroup'} ]
+            sg = {'Ref': 'SecurityGroup'}
         elif SGAction == 'Use SG with no change':
-            sg = [ {'Ref': 'SecurityGroup'} ]
+            sg = {'Ref': 'SecurityGroup'}
         if InstProfAct == 'No Role':
             InstProfName = ''
         elif InstProfAct == 'Create New Role':
