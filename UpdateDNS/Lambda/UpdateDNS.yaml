@@ -1,5 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWS Serverless function to update dns based on tags.
+Parameters:
+  S3Bucket:
+    Type: String
+    AllowedPattern: '(?!-)[a-zA-Z0-9-.]{1,63}(?<!-)'
+    ConstraintDescription: Name must be use only letters and numbers
+    Default: mauranjo
+  S3Key:
+    Type: String
+    Default: lambda/UpdateDNS/UpdateDNS.zip
 Resources:
   Ec2StateEventRule: 
     Type: AWS::Events::Rule
@@ -120,8 +129,8 @@ Resources:
       Handler: lambda_function.lambda_handler
       Runtime: python3.8
       Code:
-        S3Bucket: mauranjo
-        S3Key: lambda/UpdateDNS/UpdateDNS.zip
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Ref S3Key
       Description: 'Lambda to update DNS using Tags'
       MemorySize: 128
       Timeout: 10
