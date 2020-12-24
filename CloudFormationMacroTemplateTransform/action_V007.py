@@ -15,10 +15,10 @@ def main():
         config.fragment['Outputs'] = {}
         vpcname = config.templateParameterValues['VpcName']
         vpccidr = {'Ref': 'VpcCidr'}
-        vpcasn = {'Ref': 'VpcASN'}
+        vpcasn = config.templateParameterValues['VpcASN']
         onpremname = config.templateParameterValues['OnpremName']
         onpremcidr = {'Ref': 'OnpremCidr'}
-        onpremasn = {'Ref': 'OnpremASN'}
+        onpremasn = config.templateParameterValues['OnpremASN']
         ami = {'Ref': 'LatestAmiId'}
         traffsize = {'Ref': 'traffsize'}
         vpnsize = {'Ref': 'OnpremVPNsize'}
@@ -69,27 +69,38 @@ def main():
         action = gateway.eip(onpremname,'VPNSRV','Vpc' + onpremname)
         config.logger.info('Response: {}'.format(action))
         # create vgw
-        action = gateway.vgw('VGW',vpcasn,'MyVGW','ipsec.1',1,'Vpc' + vpcname)
+        action = gateway.vgw('VGW',vpcasn,'MyVGW','ipsec.1','Vpc' + vpcname)
         config.logger.info('Response: {}'.format(action))
         mygw = {'Ref': 'VGW'}
         # attach vgw on VPC
         vpcid = {'Ref' : 'Vpc' + vpcname}
         action = gateway.vgwattch('VGWATTC' + vpcname,mygw,vpcid)
         config.logger.info('Response: {}'.format(action))
-        # route propagation from vgw
-        rtids = [{'Ref' : 'RTDefault' + vpcname}]
-        dep = ['VGWATTC' + vpcname, 'RTDefault' + vpcname]
-        action = route.prop('MyGWRoutes',rtids,mygw,dep)
-        config.logger.info('Response: {}'.format(action))
         # create cgw
         peerip = {'Ref': 'EIP' + onpremname + 'VPNSRV'}
-        action = gateway.cgw('CGW',onpremasn,peerip,'ipsec.1',1,'EIP' + onpremname + 'VPNSRV')
+        action = gateway.cgw('CGW',onpremasn,peerip,'ipsec.1','EIP' + onpremname + 'VPNSRV')
         config.logger.info('Response: {}'.format(action))
         cgw = {'Ref': 'CGW'}
         vpntype = 'VGW'
         # create default vpn
         dep = ['VGW', 'CGW']
-        action = gateway.vpn('VPN',cgw,1,mygw,vpntype,dep)
+        if onpremasn == '0' and vpcasn == '0':
+            action = gateway.vpn('VPN',cgw,0,mygw,vpntype,dep)
+            config.logger.info('Response: {}'.format(action))
+        else:
+            action = gateway.vpn('VPN',cgw,1,mygw,vpntype,dep)
+            config.logger.info('Response: {}'.format(action))
+        # VPN Route adjust on VPC
+        if onpremasn == '0' and vpcasn == '0':
+            # add static route
+            vpnrt = { "Ref": "OnpremCidr" }
+            vpnid = { "Ref": "VPN" }
+            action = route.vpn('MyGWRoutes',vpnrt,vpnid,'VPN')
+            config.logger.info('Response: {}'.format(action))
+        # route propagation from vgw
+        rtids = [{'Ref' : 'RTDefault' + vpcname}]
+        dep = ['VGWATTC' + vpcname, 'RTDefault' + vpcname]
+        action = route.prop('MyGWRoutes',rtids,mygw,dep)
         config.logger.info('Response: {}'.format(action))
         # create iam role for deploy vpn
         pol = {
@@ -244,37 +255,67 @@ def main():
         onpremintproper['InstanceType'] = vpnsize
         onpremintproper['Monitoring'] = {}
         onpremintproper['Monitoring'] = 'false'
-        userdata = { "Fn::Base64": { "Fn::Join": [ "", [
-           "#!/bin/bash -xe\n",
-           "amazon-linux-extras install -y epel\n",
-           "yum install -y strongswan quagga python2-boto3 python-xmltodict git\n",
-           "aws configure --profile default set region ", { "Ref" : "AWS::Region" }, "\n",
-           "yum update -y\n",
-           "git clone https://github.com/mkilikrates/launchvpn.git\n",
-           "cd launchvpn\n",
-           "./vpn-tunnel.py default ", { "Ref": "VPN" }, " dynamic\n",
-           "sleep 3\n",
-           "sed -i 's/\\ -r a.b.c.d\\/e//g' ipsec_conf.txt\n",
-           "cat ipsec_conf.txt >> /etc/strongswan/ipsec.conf\n",
-           "cat ipsec.secrets.txt >> /etc/strongswan/ipsec.secrets\n",
-           "sed -i '/^router bgp/a \\ network ", { "Ref": "OnpremCidr" }, "' /launchvpn/bgpd.conf.txt\n",
-           "export GATEWAY=$(/sbin/ip route | awk '/default/ { print $3 }')\n",
-           "route add -net ", { "Ref": "OnpremCidr" }, " gw $GATEWAY\n",
-           "echo ", { "Ref": "OnpremCidr" }, " via $GATEWAY >>/etc/sysconfig/network-scripts/route-eth0\n",
-           "cat bgpd.conf.txt >> /etc/quagga/bgpd.conf\n",
-           "cp -f aws-updown.sh /etc/strongswan/ipsec.d/\n",
-           "cp -f heartbeat.sh /etc/strongswan/ipsec.d/\n",
-           "cd ..\n",
-           "rm -rf /launchvpn\n",
-           "systemctl enable strongswan\n",
-           "systemctl enable zebra\n",
-           "systemctl enable bgpd\n",
-           "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
-           "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
-           "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
-           "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
-           "systemctl restart sshd.service\n",
-           "reboot\n" ] ] } }
+        if onpremasn == '0' and vpcasn == '0':
+            userdata = { "Fn::Base64": { "Fn::Join": [ "", [
+            "#!/bin/bash -xe\n",
+            "amazon-linux-extras install -y epel\n",
+            "yum install -y strongswan python2-boto3 python-xmltodict git\n",
+            "aws configure --profile default set region ", { "Ref" : "AWS::Region" }, "\n",
+            "yum update -y\n",
+            "git clone https://github.com/mkilikrates/launchvpn.git\n",
+            "cd launchvpn\n",
+            "./vpn-tunnel.py default ", { "Ref": "VPN" }, " static\n",
+            "sleep 3\n",
+            "export REMOTENET=$(sed 's|/|\\\\/|g' <<< ", {'Ref': 'VpcCidr'}, ")\n",
+            "sed -i \"s/\\ -r a.b.c.d\\/e/\\ -r $REMOTENET/g\" ipsec_conf.txt\n",
+            "cat ipsec_conf.txt >> /etc/strongswan/ipsec.conf\n",
+            "cat ipsec.secrets.txt >> /etc/strongswan/ipsec.secrets\n",
+            "export GATEWAY=$(/sbin/ip route | awk '/default/ { print $3 }')\n",
+            "route add -net ", { "Ref": "OnpremCidr" }, " gw $GATEWAY\n",
+            "echo ", { "Ref": "OnpremCidr" }, " via $GATEWAY >>/etc/sysconfig/network-scripts/route-eth0\n",
+            "cp -f aws-updown.sh /etc/strongswan/ipsec.d/\n",
+            "cp -f heartbeat.sh /etc/strongswan/ipsec.d/\n",
+            "cd ..\n",
+            "rm -rf /launchvpn\n",
+            "systemctl enable strongswan\n",
+            "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
+            "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
+            "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
+            "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+            "systemctl restart sshd.service\n",
+            "reboot\n" ] ] } }
+        else:
+            userdata = { "Fn::Base64": { "Fn::Join": [ "", [
+            "#!/bin/bash -xe\n",
+            "amazon-linux-extras install -y epel\n",
+            "yum install -y strongswan quagga python2-boto3 python-xmltodict git\n",
+            "aws configure --profile default set region ", { "Ref" : "AWS::Region" }, "\n",
+            "yum update -y\n",
+            "git clone https://github.com/mkilikrates/launchvpn.git\n",
+            "cd launchvpn\n",
+            "./vpn-tunnel.py default ", { "Ref": "VPN" }, " dynamic\n",
+            "sleep 3\n",
+            "sed -i 's/\\ -r a.b.c.d\\/e//g' ipsec_conf.txt\n",
+            "cat ipsec_conf.txt >> /etc/strongswan/ipsec.conf\n",
+            "cat ipsec.secrets.txt >> /etc/strongswan/ipsec.secrets\n",
+            "sed -i '/^router bgp/a \\ network ", { "Ref": "OnpremCidr" }, "' /launchvpn/bgpd.conf.txt\n",
+            "export GATEWAY=$(/sbin/ip route | awk '/default/ { print $3 }')\n",
+            "route add -net ", { "Ref": "OnpremCidr" }, " gw $GATEWAY\n",
+            "echo ", { "Ref": "OnpremCidr" }, " via $GATEWAY >>/etc/sysconfig/network-scripts/route-eth0\n",
+            "cat bgpd.conf.txt >> /etc/quagga/bgpd.conf\n",
+            "cp -f aws-updown.sh /etc/strongswan/ipsec.d/\n",
+            "cp -f heartbeat.sh /etc/strongswan/ipsec.d/\n",
+            "cd ..\n",
+            "rm -rf /launchvpn\n",
+            "systemctl enable strongswan\n",
+            "systemctl enable zebra\n",
+            "systemctl enable bgpd\n",
+            "echo 'Ch@ng£m3' | passwd --stdin ec2-user\n",
+            "echo 'ClientAliveInterval 60' | tee --append /etc/ssh/sshd_config\n",
+            "echo 'ClientAliveCountMax 2' | tee --append /etc/ssh/sshd_config\n",
+            "sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+            "systemctl restart sshd.service\n",
+            "reboot\n" ] ] } }
         onpremintproper['UserData'] = userdata
         onpremintproper['Tags'] = []
         onpremintproper['Tags'] = [ {'Key': 'Name', 'Value': 'VPNSRV' + onpremname } ]

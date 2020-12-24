@@ -85,3 +85,27 @@ def prop(name,rtids,vgw,dep):
         response["body"] = str(e)
     return response
 
+def vpn(name,cidr,vpnid,dep):
+    try:
+        config.fragment['Resources']['VPNSTATRT' + name] = {}
+        config.fragment['Resources']['VPNSTATRT' + name]['Type'] = 'AWS::EC2::VPNConnectionRoute'
+        config.fragment['Resources']['VPNSTATRT' + name]['Properties'] = {}
+        config.fragment['Resources']['VPNSTATRT' + name]['Properties']['DestinationCidrBlock'] = []
+        config.fragment['Resources']['VPNSTATRT' + name]['Properties']['DestinationCidrBlock'] = cidr
+        config.fragment['Resources']['VPNSTATRT' + name]['Properties']['VpnConnectionId'] = {}
+        config.fragment['Resources']['VPNSTATRT' + name]['Properties']['VpnConnectionId'] = vpnid
+        if dep != '':
+            config.fragment['Resources']['VPNSTATRT' + name]['DependsOn'] = {}
+            config.fragment['Resources']['VPNSTATRT' + name]['DependsOn'] = dep
+        response = {}
+        response["statusCode"] = "200"
+        response["body"] = config.json.dumps('VPN Route ' + name + ' Added Success!')
+        return response
+    except Exception as e:
+        response = {}
+        config.logger.error('ERROR: {}'.format(e))
+        config.traceback.print_exc()
+        response["statusCode"] = "500"
+        response["body"] = str(e)
+    return response
+

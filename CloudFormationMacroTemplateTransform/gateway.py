@@ -34,12 +34,12 @@ def igw(name,DualStack,dep):
         response["body"] = str(e)
     return response
 
-def vgw(name,asn,desc,vgtype,bgp,dep):
+def vgw(name,asn,desc,vgtype,dep):
     try:
         config.fragment['Resources'][name] = {}
         config.fragment['Resources'][name]['Type'] = 'AWS::EC2::VPNGateway'
         config.fragment['Resources'][name]['Properties'] = {}
-        if bgp == 1:
+        if asn != '0':
             config.fragment['Resources'][name]['Properties']['AmazonSideAsn'] = {}
             config.fragment['Resources'][name]['Properties']['AmazonSideAsn'] = asn
         config.fragment['Resources'][name]['Properties']['Type'] = {}
@@ -134,7 +134,7 @@ def eggw(name,dep):
         response["body"] = str(e)
     return response
 
-def cgw(name,asn,addr,vgtype,bgp,dep):
+def cgw(name,asn,addr,vgtype,dep):
     try:
         config.fragment['Resources'][name] = {}
         config.fragment['Resources'][name]['Type'] = 'AWS::EC2::CustomerGateway'
@@ -142,10 +142,10 @@ def cgw(name,asn,addr,vgtype,bgp,dep):
         config.fragment['Resources'][name]['Properties']['IpAddress'] = {}
         config.fragment['Resources'][name]['Properties']['IpAddress'] = addr
         config.fragment['Resources'][name]['Properties']['BgpAsn'] = {}
-        if bgp == 1:
-            config.fragment['Resources'][name]['Properties']['BgpAsn'] = asn
-        else:
+        if asn == '0':
             config.fragment['Resources'][name]['Properties']['BgpAsn'] = 65000
+        else:
+            config.fragment['Resources'][name]['Properties']['BgpAsn'] = asn
         config.fragment['Resources'][name]['Properties']['Type'] = {}
         config.fragment['Resources'][name]['Properties']['Type'] = vgtype
         if dep != '':
